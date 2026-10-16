@@ -11,7 +11,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = version is null ? "Uninstallix" : $"Version {version.Major}.{version.Minor}.{version.Build}";
+        VersionText.Text = version is null ? "Uninstallix" : L.F("Version {0}.{1}.{2}", version.Major, version.Minor, version.Build);
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -45,7 +45,7 @@ public partial class MainWindow : Window
         }
         if (_update is null)
             return;
-        UpdateBannerText.Text = $"Version {_update.Version.ToString(3)} · cliquez pour voir";
+        UpdateBannerText.Text = L.F("Version {0} · cliquez pour voir", _update.Version.ToString(3));
         UpdateBanner.Visibility = Visibility.Visible;
         Anim.FadeSlideIn(UpdateBanner, 12, 450);
     }

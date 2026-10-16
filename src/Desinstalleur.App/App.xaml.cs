@@ -10,6 +10,7 @@ public partial class App : Application
     {
         DispatcherUnhandledException += OnUnhandledException;
         base.OnStartup(e);
+        L.Init(AppSettings.Current.Language);
 
         if (SelfInstaller.IsUninstallMode(e.Args))
         {
@@ -32,29 +33,29 @@ public partial class App : Application
         var self = Environment.ProcessId;
         if (System.Diagnostics.Process.GetProcessesByName("Uninstallix").Any(p => p.Id != self))
         {
-            MessageBox.Show("Uninstallix est ouvert. Fermez-le, puis relancez la désinstallation.",
-                "Désinstaller Uninstallix", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(L.T("Uninstallix est ouvert. Fermez-le, puis relancez la désinstallation."),
+                L.T("Désinstaller Uninstallix"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
-        if (MessageBox.Show("Voulez-vous vraiment désinstaller Uninstallix ?", "Désinstaller Uninstallix",
+        if (MessageBox.Show(L.T("Voulez-vous vraiment désinstaller Uninstallix ?"), L.T("Désinstaller Uninstallix"),
                 MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes)
             return;
 
         var removeData = MessageBox.Show(
-            "Supprimer aussi vos réglages, le journal et les sauvegardes du registre ?\n\n" +
-            $"Dossier : {Journal.Folder}\n\nRépondez « Non » pour les garder (conseillé si vous comptez réinstaller).",
-            "Désinstaller Uninstallix", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes;
+            L.F("Supprimer aussi vos réglages, le journal et les sauvegardes du registre ?\n\n" +
+            "Dossier : {0}\n\nRépondez « Non » pour les garder (conseillé si vous comptez réinstaller).", Journal.Folder),
+            L.T("Désinstaller Uninstallix"), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes;
 
         try
         {
             SelfInstaller.Uninstall(removeData);
-            MessageBox.Show("Uninstallix a été désinstallé.", "Désinstaller Uninstallix",
+            MessageBox.Show(L.T("Uninstallix a été désinstallé."), L.T("Désinstaller Uninstallix"),
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show("La désinstallation a échoué :\n\n" + ex.Message, "Désinstaller Uninstallix",
+            MessageBox.Show(L.F("La désinstallation a échoué :\n\n{0}", ex.Message), L.T("Désinstaller Uninstallix"),
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -63,8 +64,8 @@ public partial class App : Application
     {
         Journal.Write("Erreur inattendue : " + e.Exception);
         MessageBox.Show(
-            "Une erreur inattendue s'est produite :\n\n" + e.Exception.Message +
-            "\n\nLe détail est dans le journal : " + Journal.Folder,
+            L.F("Une erreur inattendue s'est produite :\n\n{0}\n\nLe détail est dans le journal : {1}",
+                e.Exception.Message, Journal.Folder),
             "Uninstallix", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
     }

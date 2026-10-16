@@ -45,9 +45,9 @@ public partial class UninstallWindow : Window
         {
             if (AppSettings.Current.CreateRestorePoint)
             {
-                HeaderText.Text = "Préparation";
-                FooterText.Text = "Création d'un point de restauration Windows…";
-                var error = await Task.Run(() => RestorePoint.Create("Uninstallix - avant désinstallation"));
+                HeaderText.Text = L.T("Préparation");
+                FooterText.Text = L.T("Création d'un point de restauration Windows…");
+                var error = await Task.Run(() => RestorePoint.Create(L.T("Uninstallix - avant désinstallation")));
                 Journal.Write(error is null ? "Point de restauration demandé." : "Point de restauration impossible : " + error);
             }
 
@@ -57,14 +57,14 @@ public partial class UninstallWindow : Window
                 if (_stopRequested)
                 {
                     item.Status = QueueStatus.Skipped;
-                    item.Detail = "Arrêté à votre demande";
+                    item.Detail = L.T("Arrêté à votre demande");
                     continue;
                 }
 
-                HeaderText.Text = $"Désinstallation {i + 1} sur {_queue.Count}";
-                FooterText.Text = $"En cours : {item.Program.DisplayName}";
+                HeaderText.Text = L.F("Désinstallation {0} sur {1}", i + 1, _queue.Count);
+                FooterText.Text = L.F("En cours : {0}", item.Program.DisplayName);
                 item.Status = QueueStatus.Running;
-                item.Detail = "Le désinstalleur officiel est ouvert : suivez ses instructions.";
+                item.Detail = L.T("Le désinstalleur officiel est ouvert : suivez ses instructions.");
 
                 var result = await UninstallRunner.RunAsync(item.Program, _closing.Token);
 
@@ -73,16 +73,16 @@ public partial class UninstallWindow : Window
                     case UninstallOutcome.Removed:
                         removedCount++;
                         item.Status = QueueStatus.Scanning;
-                        item.Detail = "Recherche des fichiers et clés restants…";
+                        item.Detail = L.T("Recherche des fichiers et clés restants…");
                         var found = await ScanLeftoversAsync(item.Program);
                         foreach (var leftover in found)
                             _leftovers.Add(leftover);
                         item.Status = QueueStatus.Removed;
                         item.Detail = found.Count switch
                         {
-                            0 => "Aucun reste trouvé.",
-                            1 => "1 reste trouvé.",
-                            _ => $"{found.Count} restes trouvés.",
+                            0 => L.T("Aucun reste trouvé."),
+                            1 => L.T("1 reste trouvé."),
+                            _ => L.F("{0} restes trouvés.", found.Count),
                         };
                         break;
 
@@ -95,14 +95,16 @@ public partial class UninstallWindow : Window
                         }
                         removedCount++;
                         item.Status = QueueStatus.Scanning;
-                        item.Detail = "Recherche des fichiers et de l'entrée de registre du logiciel…";
+                        item.Detail = L.T("Recherche des fichiers et de l'entrée de registre du logiciel…");
                         var forced = await ScanLeftoversAsync(item.Program);
                         foreach (var leftover in forced)
                             _leftovers.Add(leftover);
                         item.Status = QueueStatus.ForcedCleanup;
                         item.Detail = forced.Count == 0
-                            ? "Désinstalleur introuvable et aucun fichier trouvé."
-                            : $"Désinstalleur introuvable : {forced.Count} élément(s) à nettoyer vous seront proposés.";
+                            ? L.T("Désinstalleur introuvable et aucun fichier trouvé.")
+                            : L.F(forced.Count > 1
+                                ? "Désinstalleur introuvable : {0} éléments à nettoyer vous seront proposés."
+                                : "Désinstalleur introuvable : {0} élément à nettoyer vous sera proposé.", forced.Count);
                         break;
 
                     case UninstallOutcome.StillInstalled:
@@ -134,10 +136,10 @@ public partial class UninstallWindow : Window
             return;
         }
 
-        HeaderText.Text = "Terminé";
+        HeaderText.Text = L.T("Terminé");
         SubHeaderText.Text = removedCount == 0
-            ? "Aucun logiciel n'a été désinstallé."
-            : "Aucun fichier ni aucune clé de registre restants n'ont été trouvés.";
+            ? L.T("Aucun logiciel n'a été désinstallé.")
+            : L.T("Aucun fichier ni aucune clé de registre restants n'ont été trouvés.");
         FooterText.Text = string.Empty;
         CloseButton.Visibility = Visibility.Visible;
     }
@@ -149,11 +151,11 @@ public partial class UninstallWindow : Window
     private bool AskForcedCleanup(InstalledProgram program)
     {
         var answer = MessageBox.Show(this,
-            $"Le désinstalleur de « {program.DisplayName} » est introuvable : l'installation est probablement abîmée.\n\n" +
-            "Uninstallix peut faire une désinstallation forcée : il cherche les fichiers, dossiers et l'entrée de registre " +
-            "du logiciel, puis vous les présente. Rien ne sera supprimé sans votre accord.\n\n" +
-            "Fermez d'abord le logiciel s'il est ouvert. Continuer ?",
-            "Désinstalleur introuvable", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
+            L.F("Le désinstalleur de « {0} » est introuvable : l'installation est probablement abîmée.\n\n" +
+                "Uninstallix peut faire une désinstallation forcée : il cherche les fichiers, dossiers et l'entrée de registre " +
+                "du logiciel, puis vous les présente. Rien ne sera supprimé sans votre accord.\n\n" +
+                "Fermez d'abord le logiciel s'il est ouvert. Continuer ?", program.DisplayName),
+            L.T("Désinstalleur introuvable"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
         return answer == MessageBoxResult.Yes;
     }
 
@@ -188,8 +190,8 @@ public partial class UninstallWindow : Window
         QueuePanel.Visibility = Visibility.Collapsed;
         LeftoversPanel.Visibility = Visibility.Visible;
         Anim.FadeSlideIn(LeftoversPanel, 16, 380);
-        HeaderText.Text = "Restes détectés";
-        SubHeaderText.Text = "Choisissez ce que vous voulez supprimer.";
+        HeaderText.Text = L.T("Restes détectés");
+        SubHeaderText.Text = L.T("Choisissez ce que vous voulez supprimer.");
         SelectAllButton.Visibility = Visibility.Visible;
         SelectNoneButton.Visibility = Visibility.Visible;
         KeepButton.Visibility = Visibility.Visible;
@@ -223,8 +225,9 @@ public partial class UninstallWindow : Window
         var selected = PendingSelection();
         var size = selected.Sum(i => i.SizeBytes ?? 0);
         FooterText.Text = selected.Count == 0
-            ? $"{_leftovers.Count} élément(s) trouvé(s), aucun coché"
-            : $"{selected.Count} élément(s) coché(s) sur {_leftovers.Count}" + (size > 0 ? $"  ·  {ValueParsers.FormatSize(size)}" : string.Empty);
+            ? L.F(_leftovers.Count > 1 ? "{0} éléments trouvés, aucun coché" : "{0} élément trouvé, aucun coché", _leftovers.Count)
+            : L.F(selected.Count > 1 ? "{0} éléments cochés sur {1}" : "{0} élément coché sur {1}", selected.Count, _leftovers.Count)
+              + (size > 0 ? "  ·  " + ValueParsers.FormatSize(size) : string.Empty);
         DeleteButton.IsEnabled = selected.Count > 0;
     }
 
@@ -251,18 +254,27 @@ public partial class UninstallWindow : Window
         var size = selected.Sum(i => i.SizeBytes ?? 0);
         var lowConfidence = selected.Count(i => i.Confidence == MatchConfidence.Low);
 
-        var message = $"Supprimer {selected.Count} élément(s){(size > 0 ? $" ({ValueParsers.FormatSize(size)})" : string.Empty)} ?\n\n";
+        var message = size > 0
+            ? L.F(selected.Count > 1 ? "Supprimer {0} éléments ({1}) ?" : "Supprimer {0} élément ({1}) ?", selected.Count, ValueParsers.FormatSize(size))
+            : L.F(selected.Count > 1 ? "Supprimer {0} éléments ?" : "Supprimer {0} élément ?", selected.Count);
+        message += "\n\n";
         if (files > 0)
-            message += AppSettings.Current.UseRecycleBin
-                ? $"•  {files} dossier(s) ou fichier(s) iront dans la Corbeille.\n"
-                : $"•  {files} dossier(s) ou fichier(s) seront supprimés DÉFINITIVEMENT (Corbeille désactivée dans les réglages).\n";
+            message += "•  " + (AppSettings.Current.UseRecycleBin
+                ? L.F(files > 1 ? "{0} dossiers ou fichiers iront dans la Corbeille." : "{0} dossier ou fichier ira dans la Corbeille.", files)
+                : L.F(files > 1
+                    ? "{0} dossiers ou fichiers seront supprimés DÉFINITIVEMENT (Corbeille désactivée dans les réglages)."
+                    : "{0} dossier ou fichier sera supprimé DÉFINITIVEMENT (Corbeille désactivée dans les réglages).", files)) + "\n";
         if (keys > 0)
-            message += $"•  {keys} clé(s) de registre seront sauvegardées dans « {Journal.RegistryBackupFolder} » puis supprimées.\n";
+            message += "•  " + L.F(keys > 1
+                ? "{0} clés de registre seront sauvegardées dans « {1} » puis supprimées."
+                : "{0} clé de registre sera sauvegardée dans « {1} » puis supprimée.", keys, Journal.RegistryBackupFolder) + "\n";
         if (lowConfidence > 0)
-            message += $"\nAttention : {lowConfidence} élément(s) coché(s) sont marqués « À vérifier ».\n";
-        message += "\nSeuls les éléments cochés sont concernés.";
+            message += "\n" + L.F(lowConfidence > 1
+                ? "Attention : {0} éléments cochés sont marqués « À vérifier »."
+                : "Attention : {0} élément coché est marqué « À vérifier ».", lowConfidence) + "\n";
+        message += "\n" + L.T("Seuls les éléments cochés sont concernés.");
 
-        var answer = MessageBox.Show(this, message, "Confirmer la suppression",
+        var answer = MessageBox.Show(this, message, L.T("Confirmer la suppression"),
             MessageBoxButton.YesNo, lowConfidence > 0 ? MessageBoxImage.Warning : MessageBoxImage.Question, MessageBoxResult.No);
         if (answer != MessageBoxResult.Yes)
             return;
@@ -272,7 +284,7 @@ public partial class UninstallWindow : Window
         var remover = new LeftoverRemover(_guard);
         foreach (var item in selected)
         {
-            FooterText.Text = $"Suppression : {item.Path}";
+            FooterText.Text = L.F("Suppression : {0}", item.Path);
             await Task.Run(() => remover.Remove(item));
         }
         _busy = false;
@@ -283,10 +295,16 @@ public partial class UninstallWindow : Window
             selected.Select(i => i.ProgramName).Distinct(),
             selected.Where(i => i.Succeeded == true).Sum(i => i.SizeBytes ?? 0),
             failed);
-        HeaderText.Text = failed == 0 ? "Nettoyage terminé" : "Nettoyage terminé avec des erreurs";
+        HeaderText.Text = failed == 0 ? L.T("Nettoyage terminé") : L.T("Nettoyage terminé avec des erreurs");
         FooterText.Text = failed == 0
-            ? $"{ok} élément(s) supprimé(s)."
-            : $"{ok} élément(s) supprimé(s), {failed} non supprimé(s) (voir la colonne Résultat).";
+            ? L.F(ok > 1 ? "{0} éléments supprimés." : "{0} élément supprimé.", ok)
+            : L.F((ok > 1, failed > 1) switch
+            {
+                (true, true) => "{0} éléments supprimés, {1} non supprimés (voir la colonne Résultat).",
+                (true, false) => "{0} éléments supprimés, {1} non supprimé (voir la colonne Résultat).",
+                (false, true) => "{0} élément supprimé, {1} non supprimés (voir la colonne Résultat).",
+                _ => "{0} élément supprimé, {1} non supprimé (voir la colonne Résultat).",
+            }, ok, failed);
 
         SetLeftoverButtonsEnabled(true);
         KeepButton.Visibility = Visibility.Collapsed;
@@ -307,7 +325,7 @@ public partial class UninstallWindow : Window
     {
         _stopRequested = true;
         StopButton.IsEnabled = false;
-        StopButton.Content = "Arrêt après le logiciel en cours…";
+        StopButton.Content = L.T("Arrêt après le logiciel en cours…");
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
@@ -321,8 +339,8 @@ public partial class UninstallWindow : Window
         }
 
         MessageBox.Show(this,
-            "Une opération est en cours. Attendez qu'elle se termine, ou cliquez sur « Arrêter après celui-ci » " +
-            "pour ne pas lancer les logiciels suivants.",
+            L.T("Une opération est en cours. Attendez qu'elle se termine, ou cliquez sur « Arrêter après celui-ci » " +
+                "pour ne pas lancer les logiciels suivants."),
             "Uninstallix", MessageBoxButton.OK, MessageBoxImage.Information);
         e.Cancel = true;
     }

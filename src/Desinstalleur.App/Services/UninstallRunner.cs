@@ -34,12 +34,12 @@ public static class UninstallRunner
         var useQuiet = AppSettings.Current.PreferQuietUninstall && !string.IsNullOrWhiteSpace(program.QuietUninstallString);
         var command = UninstallCommand.Parse(useQuiet ? program.QuietUninstallString! : program.UninstallString);
         if (command is null)
-            return new(UninstallOutcome.Failed, "Commande de désinstallation introuvable.");
+            return new(UninstallOutcome.Failed, L.T("Commande de désinstallation introuvable."));
 
         if (Path.IsPathRooted(command.FileName) && !File.Exists(command.FileName))
         {
             Journal.Write($"Désinstalleur introuvable pour « {program.DisplayName} » : {command.FileName}");
-            return new(UninstallOutcome.MissingUninstaller, $"Son désinstalleur est introuvable : {command.FileName}");
+            return new(UninstallOutcome.MissingUninstaller, L.F("Son désinstalleur est introuvable : {0}", command.FileName));
         }
 
         Journal.Write($"Désinstallation de « {program.DisplayName} » : {command.FileName} {command.Arguments}");
@@ -61,15 +61,15 @@ public static class UninstallRunner
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
-            return new(UninstallOutcome.StillInstalled, "Autorisation refusée (contrôle de compte d'utilisateur).");
+            return new(UninstallOutcome.StillInstalled, L.T("Autorisation refusée (contrôle de compte d'utilisateur)."));
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
         {
-            return new(UninstallOutcome.MissingUninstaller, $"Son désinstalleur est introuvable : {command.FileName}");
+            return new(UninstallOutcome.MissingUninstaller, L.F("Son désinstalleur est introuvable : {0}", command.FileName));
         }
         catch (Win32Exception ex)
         {
-            return new(UninstallOutcome.Failed, $"Impossible de lancer le désinstalleur : {ex.Message}");
+            return new(UninstallOutcome.Failed, L.F("Impossible de lancer le désinstalleur : {0}", ex.Message));
         }
 
         // Attendre les éventuels processus « relais » lancés par le désinstalleur.
@@ -86,11 +86,11 @@ public static class UninstallRunner
         {
             Journal.Write($"« {program.DisplayName} » est toujours installé après le désinstalleur.");
             return new(UninstallOutcome.StillInstalled,
-                "Le logiciel est toujours installé : la désinstallation a peut-être été annulée.");
+                L.T("Le logiciel est toujours installé : la désinstallation a peut-être été annulée."));
         }
 
         Journal.Write($"« {program.DisplayName} » désinstallé.");
-        return new(UninstallOutcome.Removed, "Désinstallé avec succès.");
+        return new(UninstallOutcome.Removed, L.T("Désinstallé avec succès."));
     }
 
     private static string SafeWorkingDirectory(string fileName)

@@ -1,4 +1,5 @@
 using System.Windows.Media;
+using Desinstalleur.App.Services;
 using Desinstalleur.Core;
 using Microsoft.Win32;
 
@@ -59,7 +60,7 @@ public sealed class InstalledProgram : ObservableObject
 
     public string InstallDateText => InstallDate is null
         ? "—"
-        : (InstallDateIsEstimated ? "≈ " : string.Empty) + InstallDate.Value.ToString("d MMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("fr-FR"));
+        : (InstallDateIsEstimated ? "≈ " : string.Empty) + InstallDate.Value.ToString(L.IsEnglish ? "MMM d, yyyy" : "d MMM yyyy", L.Culture);
 
     public string Subtitle => string.Join("  ·  ", new[] { Publisher, Version is null ? null : "v" + Version }
         .Where(s => !string.IsNullOrWhiteSpace(s)));

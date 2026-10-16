@@ -92,17 +92,39 @@
             <!-- Apparence -->
             <TextBlock Text="APPARENCE" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,22">
-                <Border Style="{StaticResource SettingRow}" BorderThickness="0">
-                    <DockPanel>
-                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
-                                  IsChecked="{Binding EnableAnimations, Mode=TwoWay}" Click="Setting_Changed" />
-                        <StackPanel Margin="0,0,20,0">
-                            <TextBlock Text="Animations" Style="{StaticResource SettingTitle}" />
-                            <TextBlock Text="Apparitions en douceur des pages et des listes, compteurs animés. Désactivez-les sur un PC lent."
-                                       Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
+                <StackPanel>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" VerticalAlignment="Center" Background="{StaticResource InputBackground}"
+                                    BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="11" Padding="4">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="LanguageAuto" GroupName="Language" Style="{StaticResource SegmentButton}"
+                                                 Content="Automatique" Tag="auto" Checked="Language_Checked" />
+                                    <RadioButton x:Name="LanguageFrench" GroupName="Language" Style="{StaticResource SegmentButton}"
+                                                 Content="Français" Tag="fr" Checked="Language_Checked" />
+                                    <RadioButton x:Name="LanguageEnglish" GroupName="Language" Style="{StaticResource SegmentButton}"
+                                                 Content="English" Tag="en" Checked="Language_Checked" />
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Langue" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="« Automatique » suit la langue de Windows. Le changement s'applique au prochain démarrage."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding EnableAnimations, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Animations" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Apparitions en douceur des pages et des listes, compteurs animés. Désactivez-les sur un PC lent."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- Mises à jour -->

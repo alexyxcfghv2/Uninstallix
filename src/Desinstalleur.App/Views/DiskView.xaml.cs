@@ -26,16 +26,16 @@ public partial class DiskView : UserControl
         DrivesList.ItemsSource = DriveInfo.GetDrives()
             .Where(d => d.DriveType == DriveType.Fixed && d.IsReady)
             .Select(d => new DriveChoice(d.RootDirectory.FullName,
-                $"{d.Name.TrimEnd('\\')}  {ValueParsers.FormatSize(d.AvailableFreeSpace)} libres",
-                $"{(string.IsNullOrWhiteSpace(d.VolumeLabel) ? "Disque local" : d.VolumeLabel)} : " +
-                $"{ValueParsers.FormatSize(d.TotalSize - d.AvailableFreeSpace)} utilisés sur {ValueParsers.FormatSize(d.TotalSize)}"))
+                L.F("{0}  {1} libres", d.Name.TrimEnd('\\'), ValueParsers.FormatSize(d.AvailableFreeSpace)),
+                L.F("{0} : {1} utilisés sur {2}", string.IsNullOrWhiteSpace(d.VolumeLabel) ? L.T("Disque local") : d.VolumeLabel,
+                    ValueParsers.FormatSize(d.TotalSize - d.AvailableFreeSpace), ValueParsers.FormatSize(d.TotalSize))))
             .ToList();
 
         _progressTimer.Tick += (_, _) =>
         {
             if (_scanner is null)
                 return;
-            StatusText.Text = $"Analyse… {_scanner.FilesScanned:N0} fichiers  ·  {ValueParsers.FormatSize(_scanner.BytesScanned)}  ·  {_scanner.CurrentFolder}";
+            StatusText.Text = L.F("Analyse… {0:N0} fichiers  ·  {1}  ·  {2}", _scanner.FilesScanned, ValueParsers.FormatSize(_scanner.BytesScanned), _scanner.CurrentFolder);
         };
     }
 
@@ -47,7 +47,7 @@ public partial class DiskView : UserControl
 
     private async void ChooseFolder_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog { Title = "Choisissez le dossier à analyser" };
+        var dialog = new OpenFolderDialog { Title = L.T("Choisissez le dossier à analyser") };
         if (dialog.ShowDialog(Window.GetWindow(this)) == true)
             await ScanAsync(dialog.FolderName);
     }
@@ -81,14 +81,14 @@ public partial class DiskView : UserControl
                 return;
             var seconds = (DateTime.Now - started).TotalSeconds;
             Show(result);
-            StatusText.Text += $"  ·  analysé en {seconds:0} s";
+            StatusText.Text += L.F("  ·  analysé en {0:0} s", seconds);
         }
         catch (Exception ex) when (ex is OperationCanceledException ||
                                    ex is AggregateException agg && agg.Flatten().InnerExceptions.All(i => i is OperationCanceledException))
         {
             if (_scanner == scanner)
             {
-                StatusText.Text = "Analyse arrêtée.";
+                StatusText.Text = L.T("Analyse arrêtée.");
                 HintText.Visibility = Visibility.Visible;
             }
         }
@@ -96,7 +96,7 @@ public partial class DiskView : UserControl
         {
             Journal.Write("Analyse de l'espace disque impossible : " + ex);
             if (_scanner == scanner)
-                StatusText.Text = "Analyse impossible : " + ex.Message;
+                StatusText.Text = L.F("Analyse impossible : {0}", ex.Message);
         }
         finally
         {
@@ -115,7 +115,7 @@ public partial class DiskView : UserControl
     {
         _current = folder;
         PathText.Text = folder.FullPath;
-        StatusText.Text = $"{ValueParsers.FormatSize(folder.SizeBytes)}  ·  {folder.FileCount:N0} fichier(s)";
+        StatusText.Text = L.F(folder.FileCount > 1 ? "{0}  ·  {1:N0} fichiers" : "{0}  ·  {1:N0} fichier", ValueParsers.FormatSize(folder.SizeBytes), folder.FileCount);
         RowsList.ItemsSource = DiskScanner.RowsOf(folder);
         UpButton.IsEnabled = _trail.Count > 0;
         OpenCurrentButton.IsEnabled = true;
@@ -129,7 +129,7 @@ public partial class DiskView : UserControl
         {
             var drive = new DriveInfo(Path.GetPathRoot(root)!);
             Anim.CountBytes(FreeText, drive.AvailableFreeSpace);
-            FreeLabel.Text = $"libres sur {drive.Name.TrimEnd('\\')}";
+            FreeLabel.Text = L.F("libres sur {0}", drive.Name.TrimEnd('\\'));
         }
         catch (Exception ex) when (ex is ArgumentException or IOException)
         {
@@ -174,7 +174,7 @@ public partial class DiskView : UserControl
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Impossible d'ouvrir l'emplacement : " + ex.Message;
+            StatusText.Text = L.F("Impossible d'ouvrir l'emplacement : {0}", ex.Message);
         }
     }
 }

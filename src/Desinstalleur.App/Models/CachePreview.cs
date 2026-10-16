@@ -1,3 +1,4 @@
+using Desinstalleur.App.Services;
 using Desinstalleur.Core;
 
 namespace Desinstalleur.App.Models;
@@ -22,7 +23,7 @@ public sealed class PreviewEntry
 
     public string Glyph => IsFolder ? "" : "";
     public string SizeText => ValueParsers.FormatSize(SizeBytes);
-    public string Detail => IsFolder ? $"{FileCount} fichier(s)  ·  {Path}" : Path;
+    public string Detail => IsFolder ? L.F(FileCount > 1 ? "{0} fichiers  ·  {1}" : "{0} fichier  ·  {1}", FileCount, Path) : Path;
 }
 
 /// <summary>Aperçu complet d'un cache avant nettoyage.</summary>
@@ -38,7 +39,7 @@ public sealed class CachePreview
     /// <summary>Fichiers conservés : récents, protégés ou dans un sous-dossier gardé.</summary>
     public int KeptFiles { get; set; }
 
-    public string Name => Target.Name;
+    public string Name => Target.DisplayName;
     public string Glyph => Target.Glyph;
     public long TotalBytes => Entries.Sum(e => e.SizeBytes);
     public int TotalFiles => Entries.Sum(e => e.FileCount);
@@ -52,12 +53,12 @@ public sealed class CachePreview
         get
         {
             if (IsEmpty)
-                return "Rien à supprimer";
-            var text = $"{TotalFiles} fichier(s)";
+                return L.T("Rien à supprimer");
+            var text = L.F(TotalFiles > 1 ? "{0} fichiers" : "{0} fichier", TotalFiles);
             if (Entries.Count > MaxShown)
-                text += $"  ·  {MaxShown} plus gros éléments affichés sur {Entries.Count}";
+                text += L.F("  ·  {0} plus gros éléments affichés sur {1}", MaxShown, Entries.Count);
             if (KeptFiles > 0)
-                text += $"  ·  {KeptFiles} fichier(s) conservé(s) (récents ou protégés)";
+                text += L.F(KeptFiles > 1 ? "  ·  {0} fichiers conservés (récents ou protégés)" : "  ·  {0} fichier conservé (récent ou protégé)", KeptFiles);
             return text;
         }
     }

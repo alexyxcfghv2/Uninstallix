@@ -26,7 +26,7 @@ public sealed class LeftoverScanner
 
         // 1. Le dossier d'installation déclaré, s'il existe encore.
         if (!string.IsNullOrWhiteSpace(program.InstallLocation) && Directory.Exists(program.InstallLocation))
-            AddFolder(found, program, program.InstallLocation!, MatchConfidence.High, "Dossier d'installation déclaré par le logiciel");
+            AddFolder(found, program, program.InstallLocation!, MatchConfidence.High, L.T("Dossier d'installation déclaré par le logiciel"));
 
         // 2. Sous-dossiers portant le nom du logiciel (ou rangés dans un dossier à son éditeur).
         foreach (var root in KnownLocations.FolderRoots)
@@ -60,7 +60,7 @@ public sealed class LeftoverScanner
             var confidence = NameMatcher.Match(name, program.DisplayName, program.Publisher);
             if (confidence != MatchConfidence.None)
             {
-                AddFolder(found, program, dir, confidence, $"Dossier nommé comme le logiciel dans {Describe(root)}");
+                AddFolder(found, program, dir, confidence, L.F("Dossier nommé comme le logiciel dans {0}", Describe(root)));
                 continue;
             }
 
@@ -71,7 +71,7 @@ public sealed class LeftoverScanner
             {
                 var subConfidence = NameMatcher.Match(Path.GetFileName(sub), program.DisplayName, program.Publisher);
                 if (subConfidence != MatchConfidence.None)
-                    AddFolder(found, program, sub, subConfidence, $"Dossier du logiciel chez son éditeur, dans {Describe(root)}");
+                    AddFolder(found, program, sub, subConfidence, L.F("Dossier du logiciel chez son éditeur, dans {0}", Describe(root)));
             }
         }
     }
@@ -85,7 +85,7 @@ public sealed class LeftoverScanner
                 continue;
             var confidence = NameMatcher.Match(name[1..], program.DisplayName, program.Publisher);
             if (confidence != MatchConfidence.None)
-                AddFolder(found, program, dir, confidence, "Dossier de données dans votre profil utilisateur");
+                AddFolder(found, program, dir, confidence, L.T("Dossier de données dans votre profil utilisateur"));
         }
     }
 
@@ -116,7 +116,7 @@ public sealed class LeftoverScanner
                 Path = file,
                 SizeBytes = new FileInfo(file).Length,
                 Confidence = confidence,
-                Reason = "Raccourci vers le logiciel supprimé",
+                Reason = L.T("Raccourci vers le logiciel supprimé"),
                 IsSelected = confidence == MatchConfidence.High,
             });
         }
@@ -189,7 +189,7 @@ public sealed class LeftoverScanner
                 var confidence = NameMatcher.Match(name, program.DisplayName, program.Publisher);
                 if (confidence != MatchConfidence.None)
                 {
-                    AddKey(found, program, hive, softwarePath + "\\" + name, name, confidence, "Clé de registre nommée comme le logiciel");
+                    AddKey(found, program, hive, softwarePath + "\\" + name, name, confidence, L.T("Clé de registre nommée comme le logiciel"));
                     continue;
                 }
 
@@ -203,7 +203,7 @@ public sealed class LeftoverScanner
                 {
                     var subConfidence = NameMatcher.Match(sub, program.DisplayName, program.Publisher);
                     if (subConfidence != MatchConfidence.None)
-                        AddKey(found, program, hive, softwarePath + "\\" + name + "\\" + sub, sub, subConfidence, "Clé du logiciel chez son éditeur");
+                        AddKey(found, program, hive, softwarePath + "\\" + name + "\\" + sub, sub, subConfidence, L.T("Clé du logiciel chez son éditeur"));
                 }
             }
         }
@@ -216,7 +216,7 @@ public sealed class LeftoverScanner
     private void AddOrphanUninstallKey(Dictionary<string, LeftoverItem> found, InstalledProgram program)
     {
         if (ProgramInventory.StillExists(program))
-            AddKey(found, program, program.Hive, program.KeyPath, null, MatchConfidence.High, "Entrée de désinstallation orpheline");
+            AddKey(found, program, program.Hive, program.KeyPath, null, MatchConfidence.High, L.T("Entrée de désinstallation orpheline"));
     }
 
     private void AddKey(Dictionary<string, LeftoverItem> found, InstalledProgram program, RegistryHive hive, string subKey,
@@ -273,6 +273,6 @@ public sealed class LeftoverScanner
         if (root.Equals(KnownLocations.LocalPrograms, StringComparison.OrdinalIgnoreCase)) return "AppData\\Local\\Programs";
         if (root.Equals(KnownLocations.LocalAppData, StringComparison.OrdinalIgnoreCase)) return "AppData\\Local";
         if (root.Equals(KnownLocations.LocalLow, StringComparison.OrdinalIgnoreCase)) return "AppData\\LocalLow";
-        return "le menu Démarrer";
+        return L.T("le menu Démarrer");
     }
 }

@@ -14,13 +14,16 @@ public sealed class HistoryEntry
     public int Errors { get; set; }
 
     [JsonIgnore]
-    public string DateText => Date.ToString("dddd d MMMM yyyy  ·  HH:mm", System.Globalization.CultureInfo.GetCultureInfo("fr-FR"));
+    public string KindText => L.T(Kind);
+    [JsonIgnore]
+    public string DateText => Date.ToString(L.IsEnglish ? "dddd, MMMM d, yyyy  ·  h:mm tt" : "dddd d MMMM yyyy  ·  HH:mm", L.Culture);
     [JsonIgnore]
     public string FreedText => ValueParsers.FormatSize(FreedBytes);
     [JsonIgnore]
-    public string ItemsText => string.Join(", ", Items.Take(6)) + (Items.Count > 6 ? $" et {Items.Count - 6} autre(s)" : string.Empty);
+    public string ItemsText => string.Join(", ", Items.Take(6).Select(L.T))
+        + (Items.Count > 6 ? L.F(Items.Count - 6 > 1 ? " et {0} autres" : " et {0} autre", Items.Count - 6) : string.Empty);
     [JsonIgnore]
-    public string ErrorsText => Errors == 0 ? string.Empty : $"{Errors} élément(s) non supprimé(s)";
+    public string ErrorsText => Errors == 0 ? string.Empty : L.F(Errors > 1 ? "{0} éléments non supprimés" : "{0} élément non supprimé", Errors);
     [JsonIgnore]
     public bool HasErrors => Errors > 0;
     [JsonIgnore]

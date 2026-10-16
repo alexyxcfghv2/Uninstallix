@@ -38,11 +38,11 @@ public partial class ReportWindow : Window
         try
         {
             Clipboard.SetText(PreviewBox.Text);
-            ResultText.Text = "✓ Rapport copié : collez-le (Ctrl+V) dans votre message à Claude.";
+            ResultText.Text = L.T("✓ Rapport copié : collez-le (Ctrl+V) dans votre message à Claude.");
         }
         catch (Exception ex)
         {
-            ResultText.Text = "Copie impossible : " + ex.Message;
+            ResultText.Text = L.F("Copie impossible : {0}", ex.Message);
         }
         Anim.FadeSlideIn(ResultText, 6);
     }
@@ -51,9 +51,9 @@ public partial class ReportWindow : Window
     {
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Title = "Enregistrer le rapport",
-            FileName = $"Rapport Uninstallix {DateTime.Now:yyyy-MM-dd HH-mm}.txt",
-            Filter = "Fichier texte (*.txt)|*.txt",
+            Title = L.T("Enregistrer le rapport"),
+            FileName = L.F("Rapport Uninstallix {0:yyyy-MM-dd HH-mm}.txt", DateTime.Now),
+            Filter = L.T("Fichier texte (*.txt)|*.txt"),
             InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
         };
         if (dialog.ShowDialog(this) != true)
@@ -61,11 +61,11 @@ public partial class ReportWindow : Window
         try
         {
             File.WriteAllText(dialog.FileName, PreviewBox.Text);
-            ResultText.Text = "✓ Rapport enregistré.";
+            ResultText.Text = L.T("✓ Rapport enregistré.");
         }
         catch (Exception ex)
         {
-            ResultText.Text = "Enregistrement impossible : " + ex.Message;
+            ResultText.Text = L.F("Enregistrement impossible : {0}", ex.Message);
         }
         Anim.FadeSlideIn(ResultText, 6);
     }

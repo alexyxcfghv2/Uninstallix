@@ -1,8 +1,8 @@
-# Publie une nouvelle version automatiquement.
-# À chaque envoi sur « main », GitHub lit la <Version> du projet. Si cette version n'est pas encore
-# publiée, il compile Uninstallix sous Windows, lance les tests, fabrique Uninstallix-Setup.exe
-# et crée la « Release » vX.Y.Z que l'appli détecte toute seule.
-name: Publier une version
+# Publishes a new version automatically.
+# On every push to "main", GitHub reads the project's <Version>. If that version is not published yet,
+# it builds Uninstallix on Windows, runs the tests, produces Uninstallix-Setup.exe
+# and creates the vX.Y.Z release that the app detects by itself.
+name: Release
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Lecture de la version
+      - name: Read version
         id: version
         shell: pwsh
         env:
@@ -36,7 +36,7 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "publish=$(-not $exists)".ToLower() >> $env:GITHUB_OUTPUT
-          if ($exists) { Write-Host "La version $tag est déjà publiée : rien à faire." } else { Write-Host "Nouvelle version à publier : $tag" }
+          if ($exists) { Write-Host "Version $tag is already published: nothing to do." } else { Write-Host "New version to publish: $tag" }
           exit 0
 
       - uses: actions/setup-dotnet@v4
@@ -44,11 +44,11 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Tests du moteur
+      - name: Engine tests
         if: steps.version.outputs.publish == 'true'
         run: dotnet test tests/Desinstalleur.Core.Tests -c Release
 
-      - name: Fabrication de Uninstallix-Setup.exe
+      - name: Build Uninstallix-Setup.exe
         if: steps.version.outputs.publish == 'true'
         shell: pwsh
         run: |
@@ -59,7 +59,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Copy-Item setup-build/Uninstallix.exe Uninstallix-Setup.exe
 
-      - name: Création de la version sur GitHub
+      - name: Create GitHub release
         if: steps.version.outputs.publish == 'true'
         shell: pwsh
         env:
@@ -69,7 +69,7 @@ jobs:
         run: |
           $notes = "release-notes/$env:TAG.md"
           if (-not (Test-Path $notes)) {
-            Set-Content -Path notes.md -Value "Nouvelle version d'Uninstallix." -Encoding utf8
+            Set-Content -Path notes.md -Value "New version of Uninstallix." -Encoding utf8
             $notes = "notes.md"
           }
           gh release create $env:TAG Uninstallix-Setup.exe --target $env:GITHUB_SHA --title "Uninstallix $env:VERSION" --notes-file $notes

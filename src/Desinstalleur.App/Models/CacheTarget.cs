@@ -1,3 +1,4 @@
+using Desinstalleur.App.Services;
 using Desinstalleur.Core;
 
 namespace Desinstalleur.App.Models;
@@ -13,6 +14,10 @@ public sealed class CacheTarget : ObservableObject
 
     public required string Name { get; init; }
     public required string Description { get; init; }
+
+    /// <summary>Nom affiché (Name reste l'identifiant enregistré dans les profils).</summary>
+    public string DisplayName => L.T(Name);
+    public string DisplayDescription => L.T(Description);
 
     /// <summary>Glyphe Segoe Fluent Icons.</summary>
     public required string Glyph { get; init; }
@@ -58,8 +63,8 @@ public sealed class CacheTarget : ObservableObject
 
     public string SizeText => SizeBytes switch
     {
-        null => "Analyse…",
-        0 => "Vide",
+        null => L.T("Analyse…"),
+        0 => L.T("Vide"),
         _ => ValueParsers.FormatSize(SizeBytes),
     };
 

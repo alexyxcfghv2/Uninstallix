@@ -163,11 +163,11 @@
                                         </Border>
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
                                                 <TextBlock x:Name="Status" Text="{Binding StatusText}" FontSize="12" Margin="10,1,0,0"
                                                            Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center" />
                                             </StackPanel>
-                                            <TextBlock Text="{Binding Description}" Style="{StaticResource SecondaryText}" FontSize="12"
+                                            <TextBlock Text="{Binding DisplayDescription}" Style="{StaticResource SecondaryText}" FontSize="12"
                                                        TextWrapping="Wrap" Margin="0,2,0,0" />
                                         </StackPanel>
                                         <Grid Grid.Column="3" MinWidth="110" Margin="14,0,4,0" VerticalAlignment="Center">

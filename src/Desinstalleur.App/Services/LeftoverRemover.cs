@@ -43,20 +43,20 @@ public sealed class LeftoverRemover
         var refusal = _guard.CheckPath(item.Path);
         if (refusal is not null)
         {
-            Fail(item, refusal);
+            Fail(item, L.T(refusal));
             return;
         }
 
         var exists = item.Kind == LeftoverKind.Folder ? Directory.Exists(item.Path) : File.Exists(item.Path);
         if (!exists)
         {
-            Succeed(item, "Déjà absent");
+            Succeed(item, L.T("Déjà absent"));
             return;
         }
 
         if (File.GetAttributes(item.Path).HasFlag(FileAttributes.ReparsePoint))
         {
-            Fail(item, "Lien symbolique ou jonction : ignoré par sécurité.");
+            Fail(item, L.T("Lien symbolique ou jonction : ignoré par sécurité."));
             return;
         }
 
@@ -71,11 +71,11 @@ public sealed class LeftoverRemover
         if (code == 0 && !stillThere)
         {
             Journal.Write($"Envoyé à la Corbeille : {item.Path}");
-            Succeed(item, "Envoyé à la Corbeille");
+            Succeed(item, L.T("Envoyé à la Corbeille"));
         }
         else
         {
-            Fail(item, code == 0 ? "Certains fichiers sont utilisés ou protégés." : $"Erreur Windows {code}.");
+            Fail(item, code == 0 ? L.T("Certains fichiers sont utilisés ou protégés.") : L.F("Erreur Windows {0}.", code));
         }
     }
 
@@ -103,11 +103,13 @@ public sealed class LeftoverRemover
         if (failures == 0)
         {
             Journal.Write($"Supprimé définitivement : {item.Path}");
-            Succeed(item, "Supprimé définitivement");
+            Succeed(item, L.T("Supprimé définitivement"));
         }
         else
         {
-            Fail(item, $"{failures} élément(s) utilisés ou protégés n'ont pas pu être supprimés.");
+            Fail(item, L.F(failures > 1
+                ? "{0} éléments utilisés ou protégés n'ont pas pu être supprimés."
+                : "{0} élément utilisé ou protégé n'a pas pu être supprimé.", failures));
         }
     }
 
@@ -171,7 +173,7 @@ public sealed class LeftoverRemover
         var refusal = SafetyGuard.CheckRegistryKey(item.Path);
         if (refusal is not null || string.IsNullOrEmpty(item.RegistrySubKey))
         {
-            Fail(item, refusal ?? "Clé invalide.");
+            Fail(item, refusal is not null ? L.T(refusal) : L.T("Clé invalide."));
             return;
         }
 
@@ -180,7 +182,7 @@ public sealed class LeftoverRemover
         {
             if (existing is null)
             {
-                Succeed(item, "Déjà absente");
+                Succeed(item, L.T("Déjà absente"));
                 return;
             }
         }
@@ -188,13 +190,13 @@ public sealed class LeftoverRemover
         var backup = BackupKey(item.Path);
         if (backup is null)
         {
-            Fail(item, "Sauvegarde impossible : clé conservée par sécurité.");
+            Fail(item, L.T("Sauvegarde impossible : clé conservée par sécurité."));
             return;
         }
 
         root.DeleteSubKeyTree(item.RegistrySubKey, throwOnMissingSubKey: false);
         Journal.Write($"Clé supprimée : {item.Path} (sauvegarde : {backup})");
-        Succeed(item, "Supprimée (sauvegarde .reg créée)");
+        Succeed(item, L.T("Supprimée (sauvegarde .reg créée)"));
     }
 
     /// <summary>Exporte la clé avec reg.exe. Renvoie le chemin du fichier, ou null en cas d'échec.</summary>

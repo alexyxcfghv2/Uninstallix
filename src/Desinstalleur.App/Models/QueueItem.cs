@@ -1,3 +1,5 @@
+using Desinstalleur.App.Services;
+
 namespace Desinstalleur.App.Models;
 
 public enum QueueStatus
@@ -45,14 +47,14 @@ public sealed class QueueItem : ObservableObject
 
     public string StatusText => Status switch
     {
-        QueueStatus.Waiting => "En attente",
-        QueueStatus.Running => "Désinstallation en cours…",
-        QueueStatus.Scanning => "Recherche des restes…",
-        QueueStatus.Removed => "Désinstallé",
-        QueueStatus.ForcedCleanup => "Nettoyage forcé",
-        QueueStatus.StillInstalled => "Toujours installé",
-        QueueStatus.Failed => "Échec",
-        QueueStatus.Skipped => "Ignoré",
+        QueueStatus.Waiting => L.T("En attente"),
+        QueueStatus.Running => L.T("Désinstallation en cours…"),
+        QueueStatus.Scanning => L.T("Recherche des restes…"),
+        QueueStatus.Removed => L.T("Désinstallé"),
+        QueueStatus.ForcedCleanup => L.T("Nettoyage forcé"),
+        QueueStatus.StillInstalled => L.T("Toujours installé"),
+        QueueStatus.Failed => L.T("Échec"),
+        QueueStatus.Skipped => L.T("Ignoré"),
         _ => string.Empty,
     };
 }

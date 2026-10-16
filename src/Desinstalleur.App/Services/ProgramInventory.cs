@@ -107,12 +107,15 @@ public static class ProgramInventory
             InstallDateIsEstimated = estimated,
             SizeBytes = ValueParsers.EstimatedSizeToBytes(key.GetValue("EstimatedSize")),
             ProtectionReason = displayName == "Uninstallix"
-                ? "C'est Uninstallix lui-même : désinstallez-le depuis « Applications installées » de Windows."
+                ? L.T("C'est Uninstallix lui-même : désinstallez-le depuis « Applications installées » de Windows.")
                 : Favorites.IsProtectedProgram(displayName)
-                ? "il est dans vos favoris protégés (Réglages › Favoris protégés)"
-                : ProtectionRules.GetProtectionReason(displayName, publisher, isSystemComponent),
+                ? L.T("il est dans vos favoris protégés (Réglages › Favoris protégés)")
+                : TranslateReason(ProtectionRules.GetProtectionReason(displayName, publisher, isSystemComponent)),
         };
     }
+
+    /// <summary>Traduit la raison de protection renvoyée par le moteur (texte français).</summary>
+    private static string? TranslateReason(string? reason) => reason is null ? null : L.T(reason);
 
     /// <summary>
     /// Calcule la taille du dossier d'installation pour les logiciels qui ne la déclarent pas.

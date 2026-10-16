@@ -135,8 +135,10 @@ public partial class CleanupView : UserControl
         var selected = _targets.Where(t => t.IsSelected).ToList();
         var size = selected.Sum(t => t.SizeBytes ?? 0);
         SelectionText.Text = selected.Count == 0
-            ? "Aucun élément coché"
-            : $"{selected.Count} élément(s) coché(s)" + (size > 0 ? $"  ·  {ValueParsers.FormatSize(size)} à libérer" : string.Empty);
+            ? L.T("Aucun élément coché")
+            : size > 0
+                ? L.F(selected.Count > 1 ? "{0} éléments cochés  ·  {1} à libérer" : "{0} élément coché  ·  {1} à libérer", selected.Count, ValueParsers.FormatSize(size))
+                : L.F(selected.Count > 1 ? "{0} éléments cochés" : "{0} élément coché", selected.Count);
         CleanButton.IsEnabled = !_busy && selected.Count > 0;
     }
 
@@ -186,14 +188,15 @@ public partial class CleanupView : UserControl
                 errors += skipped;
                 target.Succeeded = skipped == 0;
                 target.StatusText = skipped == 0
-                    ? $"✓ {ValueParsers.FormatSize(freed)} libérés"
-                    : $"{ValueParsers.FormatSize(freed)} libérés, {skipped} fichier(s) en cours d'utilisation ignoré(s)";
+                    ? L.F("✓ {0} libérés", ValueParsers.FormatSize(freed))
+                    : L.F(skipped > 1 ? "{0} libérés, {1} fichiers en cours d'utilisation ignorés" : "{0} libérés, {1} fichier en cours d'utilisation ignoré",
+                        ValueParsers.FormatSize(freed), skipped);
                 target.SizeBytes = await Task.Run(() => CacheCleaner.Measure(target));
             }
             catch (Exception ex)
             {
                 target.Succeeded = false;
-                target.StatusText = "Erreur : " + ex.Message;
+                target.StatusText = L.F("Erreur : {0}", ex.Message);
                 errors++;
             }
             finally
@@ -205,7 +208,7 @@ public partial class CleanupView : UserControl
         CleanupHistory.Add("Caches", selected.Select(t => t.Name), totalFreed, errors);
         _busy = false;
         UpdateSelection();
-        SelectionText.Text = $"Nettoyage terminé : {ValueParsers.FormatSize(totalFreed)} libérés.";
+        SelectionText.Text = L.F("Nettoyage terminé : {0} libérés.", ValueParsers.FormatSize(totalFreed));
         Anim.FadeSlideIn(SelectionText, 8);
         MemoryOptimizer.TrimSelfInBackground();
     }
@@ -217,7 +220,7 @@ public partial class CleanupView : UserControl
         var status = MemoryOptimizer.GetStatus();
         if (status.TotalBytes == 0)
             return;
-        RamText.Text = $"{ValueParsers.FormatSize((long)status.UsedBytes)} / {ValueParsers.FormatSize((long)status.TotalBytes)}  ·  {status.UsedPercent:0} %";
+        RamText.Text = L.F("{0} / {1}  ·  {2:0} %", ValueParsers.FormatSize((long)status.UsedBytes), ValueParsers.FormatSize((long)status.TotalBytes), status.UsedPercent);
         var parent = RamBar.Parent as FrameworkElement;
         if (parent is not null && parent.ActualWidth > 0)
             Anim.Width(RamBar, parent.ActualWidth * status.UsedPercent / 100.0);
@@ -226,12 +229,12 @@ public partial class CleanupView : UserControl
     private async void FreeRam_Click(object sender, RoutedEventArgs e)
     {
         RamButton.IsEnabled = false;
-        RamResultText.Text = "Optimisation en cours…";
+        RamResultText.Text = L.T("Optimisation en cours…");
         var freed = await Task.Run(MemoryOptimizer.Optimize);
         UpdateRam();
         RamResultText.Text = freed > 0
-            ? $"✓ {ValueParsers.FormatSize(freed)} de mémoire libérés. Effet temporaire : Windows la réutilisera selon ses besoins."
-            : "La mémoire était déjà bien gérée : rien de plus à libérer pour le moment.";
+            ? L.F("✓ {0} de mémoire libérés. Effet temporaire : Windows la réutilisera selon ses besoins.", ValueParsers.FormatSize(freed))
+            : L.T("La mémoire était déjà bien gérée : rien de plus à libérer pour le moment.");
         Anim.FadeSlideIn(RamResultText, 8);
         RamButton.IsEnabled = true;
     }
@@ -239,7 +242,7 @@ public partial class CleanupView : UserControl
     private async void FlushDns_Click(object sender, RoutedEventArgs e)
     {
         var ok = await Task.Run(MemoryOptimizer.FlushDns);
-        DnsResultText.Text = ok ? "✓ Cache DNS vidé." : "Impossible de vider le cache DNS.";
+        DnsResultText.Text = ok ? L.T("✓ Cache DNS vidé.") : L.T("Impossible de vider le cache DNS.");
         Anim.FadeSlideIn(DnsResultText, 8);
     }
 }

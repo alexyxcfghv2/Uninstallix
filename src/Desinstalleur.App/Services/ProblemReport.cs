@@ -11,33 +11,33 @@ public static class ProblemReport
     {
         var memory = MemoryOptimizer.GetStatus();
         var text = new StringBuilder();
-        text.AppendLine("=== Rapport de problème Uninstallix ===");
-        text.AppendLine($"Date : {DateTime.Now:dd/MM/yyyy HH:mm}");
-        text.AppendLine($"Version d'Uninstallix : {SelfInstaller.Version}");
-        text.AppendLine($"Windows : {RuntimeInformation.OSDescription} ({RuntimeInformation.OSArchitecture})");
-        text.AppendLine($".NET : {RuntimeInformation.FrameworkDescription}");
-        text.AppendLine($"Mémoire : {Desinstalleur.Core.ValueParsers.FormatSize((long)memory.TotalBytes)}  ·  utilisée à {memory.UsedPercent:0} %");
-        text.AppendLine($"Langue : {System.Globalization.CultureInfo.CurrentUICulture.Name}");
+        text.AppendLine(L.T("=== Rapport de problème Uninstallix ==="));
+        text.AppendLine(L.F("Date : {0:dd/MM/yyyy HH:mm}", DateTime.Now));
+        text.AppendLine(L.F("Version d'Uninstallix : {0}", SelfInstaller.Version));
+        text.AppendLine(L.F("Windows : {0} ({1})", RuntimeInformation.OSDescription, RuntimeInformation.OSArchitecture));
+        text.AppendLine(L.F(".NET : {0}", RuntimeInformation.FrameworkDescription));
+        text.AppendLine(L.F("Mémoire : {0}  ·  utilisée à {1:0} %", Desinstalleur.Core.ValueParsers.FormatSize((long)memory.TotalBytes), memory.UsedPercent));
+        text.AppendLine(L.F("Langue : {0}", System.Globalization.CultureInfo.CurrentUICulture.Name));
         text.AppendLine();
-        text.AppendLine("--- Description ---");
-        text.AppendLine(string.IsNullOrWhiteSpace(description) ? "(non renseignée)" : description.Trim());
+        text.AppendLine(L.T("--- Description ---"));
+        text.AppendLine(string.IsNullOrWhiteSpace(description) ? L.T("(non renseignée)") : description.Trim());
 
         if (includeSettings)
         {
             text.AppendLine();
-            text.AppendLine("--- Réglages ---");
+            text.AppendLine(L.T("--- Réglages ---"));
             var s = AppSettings.Current;
-            text.AppendLine($"Point de restauration : {OuiNon(s.CreateRestorePoint)}  ·  Silencieuse : {OuiNon(s.PreferQuietUninstall)}  ·  " +
-                            $"Cochage auto : {OuiNon(s.AutoSelectSafeLeftovers)}  ·  Corbeille : {OuiNon(s.UseRecycleBin)}");
-            text.AppendLine($"Composants système : {OuiNon(s.ShowSystemComponents)}  ·  Garder temp récents : {OuiNon(s.KeepRecentTempFiles)}  ·  " +
-                            $"Animations : {OuiNon(s.EnableAnimations)}  ·  Profil : {s.ActiveProfile}");
-            text.AppendLine($"Favoris protégés : {s.ProtectedFolders.Count} dossier(s), {s.ProtectedPrograms.Count} logiciel(s)");
+            text.AppendLine(L.F("Point de restauration : {0}  ·  Silencieuse : {1}  ·  Cochage auto : {2}  ·  Corbeille : {3}",
+                                OuiNon(s.CreateRestorePoint), OuiNon(s.PreferQuietUninstall), OuiNon(s.AutoSelectSafeLeftovers), OuiNon(s.UseRecycleBin)));
+            text.AppendLine(L.F("Composants système : {0}  ·  Garder temp récents : {1}  ·  Animations : {2}  ·  Profil : {3}",
+                                OuiNon(s.ShowSystemComponents), OuiNon(s.KeepRecentTempFiles), OuiNon(s.EnableAnimations), s.ActiveProfile));
+            text.AppendLine(L.F("Favoris protégés : {0} dossier(s), {1} logiciel(s)", s.ProtectedFolders.Count, s.ProtectedPrograms.Count));
         }
 
         if (includeJournal)
         {
             text.AppendLine();
-            text.AppendLine("--- Journal (200 dernières lignes) ---");
+            text.AppendLine(L.T("--- Journal (200 dernières lignes) ---"));
             var journal = Path.Combine(Journal.Folder, "journal.txt");
             try
             {
@@ -51,12 +51,12 @@ public static class ProblemReport
                 }
                 else
                 {
-                    text.AppendLine("(journal vide)");
+                    text.AppendLine(L.T("(journal vide)"));
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                text.AppendLine("(journal illisible : " + ex.Message + ")");
+                text.AppendLine(L.F("(journal illisible : {0})", ex.Message));
             }
         }
 
@@ -71,14 +71,14 @@ public static class ProblemReport
         if (!string.IsNullOrEmpty(profile))
             text = Regex.Replace(text, Regex.Escape(profile), "%USERPROFILE%", RegexOptions.IgnoreCase);
         // Autres profils éventuels (C:\Users\quelqu'un\...)
-        text = Regex.Replace(text, @"(?i)([A-Z]:\\(?:Users|Utilisateurs)\\)(?!Public\\|Default\\)[^\\\r\n""]+", "$1<utilisateur>");
+        text = Regex.Replace(text, @"(?i)([A-Z]:\\(?:Users|Utilisateurs)\\)(?!Public\\|Default\\)[^\\\r\n""]+", "$1" + L.T("<utilisateur>"));
         if (Environment.UserName.Length > 2)
-            text = Regex.Replace(text, $@"\b{Regex.Escape(Environment.UserName)}\b", "<utilisateur>", RegexOptions.IgnoreCase);
+            text = Regex.Replace(text, $@"\b{Regex.Escape(Environment.UserName)}\b", L.T("<utilisateur>"), RegexOptions.IgnoreCase);
         if (Environment.MachineName.Length > 2)
             text = Regex.Replace(text, $@"\b{Regex.Escape(Environment.MachineName)}\b", "<pc>", RegexOptions.IgnoreCase);
         text = Regex.Replace(text, @"[\w.+-]+@[\w-]+\.[\w.-]+", "<e-mail>");
         return text;
     }
 
-    private static string OuiNon(bool value) => value ? "oui" : "non";
+    private static string OuiNon(bool value) => value ? L.T("oui") : L.T("non");
 }

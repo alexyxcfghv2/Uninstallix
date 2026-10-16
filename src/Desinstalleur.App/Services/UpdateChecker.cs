@@ -55,13 +55,26 @@ public static class UpdateChecker
             return new UpdateInfo(
                 version,
                 root.TryGetProperty("name", out var name) && !string.IsNullOrWhiteSpace(name.GetString()) ? name.GetString()! : $"Uninstallix {version}",
-                root.TryGetProperty("body", out var body) ? body.GetString() ?? string.Empty : string.Empty,
+                NotesForLanguage(root.TryGetProperty("body", out var body) ? body.GetString() ?? string.Empty : string.Empty),
                 asset.GetProperty("browser_download_url").GetString()!,
                 asset.GetProperty("size").GetInt64(),
                 sha,
                 root.GetProperty("html_url").GetString() ?? $"https://github.com/{Repository}/releases");
         }
         return null; // version publiée sans installateur : on ignore
+    }
+
+    /// <summary>
+    /// Les notes de version sont en anglais, puis en français après la ligne « &lt;!-- fr --&gt; » :
+    /// on ne garde que la partie de la langue de l'interface.
+    /// </summary>
+    private static string NotesForLanguage(string body)
+    {
+        const string marker = "<!-- fr -->";
+        var index = body.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (index < 0)
+            return body;
+        return (L.IsEnglish ? body[..index] : body[(index + marker.Length)..]).Trim();
     }
 
     /// <summary>Télécharge l'installateur (vérifié par SHA-256 quand GitHub le fournit) et renvoie son chemin.</summary>
@@ -93,7 +106,7 @@ public static class UpdateChecker
             if (!hash.Equals(update.Sha256, StringComparison.OrdinalIgnoreCase))
             {
                 File.Delete(target);
-                throw new InvalidOperationException("Le fichier téléchargé est abîmé (empreinte incorrecte). Réessayez plus tard.");
+                throw new InvalidOperationException(L.T("Le fichier téléchargé est abîmé (empreinte incorrecte). Réessayez plus tard."));
             }
         }
         Journal.Write($"Mise à jour {update.Version} téléchargée : {target}");

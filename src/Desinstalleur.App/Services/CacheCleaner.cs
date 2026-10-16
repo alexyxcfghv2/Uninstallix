@@ -237,7 +237,7 @@ public static class CacheCleaner
         {
             var info = new SHQUERYRBINFO { cbSize = Marshal.SizeOf<SHQUERYRBINFO>() };
             if (SHQueryRecycleBin(null, ref info) == 0 && info.i64NumItems > 0)
-                preview.Entries.Add(new PreviewEntry("Contenu de la Corbeille", "Corbeille de tous les lecteurs", info.i64Size, (int)info.i64NumItems, false));
+                preview.Entries.Add(new PreviewEntry(L.T("Contenu de la Corbeille"), L.T("Corbeille de tous les lecteurs"), info.i64Size, (int)info.i64NumItems, false));
             return preview;
         }
 

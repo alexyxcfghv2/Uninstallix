@@ -64,7 +64,7 @@ public partial class ProgramsView : UserControl
         catch (Exception ex)
         {
             LoadingPanel.Visibility = Visibility.Collapsed;
-            MessageBox.Show(Host, "Impossible de lire la liste des logiciels : " + ex.Message, "Uninstallix",
+            MessageBox.Show(Host, L.F("Impossible de lire la liste des logiciels : {0}", ex.Message), "Uninstallix",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
@@ -249,10 +249,10 @@ public partial class ProgramsView : UserControl
             return;
 
         var answer = MessageBox.Show(Host,
-            "Les éléments protégés sont des composants dont Windows ou d'autres logiciels ont besoin " +
+            L.T("Les éléments protégés sont des composants dont Windows ou d'autres logiciels ont besoin " +
             "(pilotes, Visual C++, .NET, WebView2…). Les désinstaller peut empêcher des programmes, " +
-            "voire votre matériel, de fonctionner.\n\nVoulez-vous vraiment autoriser leur sélection ?",
-            "Déverrouiller les éléments protégés", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+            "voire votre matériel, de fonctionner.\n\nVoulez-vous vraiment autoriser leur sélection ?"),
+            L.T("Déverrouiller les éléments protégés"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
 
         if (answer != MessageBoxResult.Yes)
         {
@@ -289,12 +289,12 @@ public partial class ProgramsView : UserControl
 
         if (selected.Count == 0)
         {
-            SelectionText.Text = "Aucun logiciel sélectionné";
+            SelectionText.Text = L.T("Aucun logiciel sélectionné");
             return;
         }
 
         var size = selected.Sum(p => p.SizeBytes ?? 0);
-        var label = selected.Count == 1 ? "1 logiciel sélectionné" : $"{selected.Count} logiciels sélectionnés";
+        var label = selected.Count == 1 ? L.T("1 logiciel sélectionné") : L.F("{0} logiciels sélectionnés", selected.Count);
         SelectionText.Text = size > 0 ? $"{label}  ·  {ValueParsers.FormatSize(size)}" : label;
     }
 
@@ -303,9 +303,9 @@ public partial class ProgramsView : UserControl
         var visible = _view.Cast<InstalledProgram>().ToList();
         var total = visible.Sum(p => p.SizeBytes ?? 0);
         var protectedCount = visible.Count(p => p.IsProtected);
-        CountText.Text = visible.Count.ToString(CultureInfo.CurrentCulture);
+        CountText.Text = visible.Count.ToString(L.Culture);
         Anim.CountBytes(TotalSizeText, total);
-        ProtectedCountText.Text = protectedCount.ToString(CultureInfo.CurrentCulture);
+        ProtectedCountText.Text = protectedCount.ToString(L.Culture);
     }
 
     private void ClearSelection_Click(object sender, RoutedEventArgs e)
@@ -328,9 +328,9 @@ public partial class ProgramsView : UserControl
             return;
         if (!p.CanSelect)
         {
-            MessageBox.Show(Host, $"« {p.DisplayName} » est protégé : {p.ProtectionReason}.\n\n" +
-                "Cochez « Déverrouiller les protégés » si vous voulez vraiment le désinstaller.",
-                "Élément protégé", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Host, L.F("« {0} » est protégé : {1}.\n\n" +
+                "Cochez « Déverrouiller les protégés » si vous voulez vraiment le désinstaller.", p.DisplayName, p.ProtectionReason),
+                L.T("Élément protégé"), MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         await StartUninstallAsync(new List<InstalledProgram> { p });
@@ -342,7 +342,7 @@ public partial class ProgramsView : UserControl
             return;
         if (string.IsNullOrWhiteSpace(p.InstallLocation) || !Directory.Exists(p.InstallLocation))
         {
-            MessageBox.Show(Host, "Ce logiciel n'indique pas de dossier d'installation.", "Uninstallix",
+            MessageBox.Show(Host, L.T("Ce logiciel n'indique pas de dossier d'installation."), "Uninstallix",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
@@ -353,8 +353,8 @@ public partial class ProgramsView : UserControl
     {
         if (ProgramsGrid.SelectedItem is InstalledProgram p)
             FavoriteMenuItem.Header = Favorites.IsProtectedProgram(p.DisplayName)
-                ? "Retirer des favoris protégés"
-                : "Ajouter aux favoris protégés";
+                ? L.T("Retirer des favoris protégés")
+                : L.T("Ajouter aux favoris protégés");
     }
 
     private async void ToggleFavorite_Click(object sender, RoutedEventArgs e)
@@ -387,13 +387,18 @@ public partial class ProgramsView : UserControl
     {
         var names = string.Join("\n", selected.Take(12).Select(p => "•  " + p.DisplayName));
         if (selected.Count > 12)
-            names += $"\n…et {selected.Count - 12} autre(s)";
+            names += "\n" + L.F(selected.Count - 12 > 1 ? "…et {0} autres" : "…et {0} autre", selected.Count - 12);
 
         var confirm = MessageBox.Show(Host,
-            $"Désinstaller {(selected.Count == 1 ? "ce logiciel" : $"ces {selected.Count} logiciels")} ?\n\n{names}\n\n" +
-            "Le désinstalleur officiel de chaque logiciel va s'ouvrir, l'un après l'autre. " +
-            "Ensuite, les fichiers restants vous seront présentés : rien ne sera supprimé sans votre accord.",
-            "Confirmer la désinstallation", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+            L.F(selected.Count == 1
+                ? "Désinstaller ce logiciel ?\n\n{1}\n\n" +
+                  "Le désinstalleur officiel de chaque logiciel va s'ouvrir, l'un après l'autre. " +
+                  "Ensuite, les fichiers restants vous seront présentés : rien ne sera supprimé sans votre accord."
+                : "Désinstaller ces {0} logiciels ?\n\n{1}\n\n" +
+                  "Le désinstalleur officiel de chaque logiciel va s'ouvrir, l'un après l'autre. " +
+                  "Ensuite, les fichiers restants vous seront présentés : rien ne sera supprimé sans votre accord.",
+                selected.Count, names),
+            L.T("Confirmer la désinstallation"), MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
         if (confirm != MessageBoxResult.Yes)
             return;
 
@@ -402,9 +407,9 @@ public partial class ProgramsView : UserControl
         {
             var list = string.Join("\n", protectedOnes.Select(p => $"•  {p.DisplayName} ({p.ProtectionReason})"));
             var again = MessageBox.Show(Host,
-                $"Attention : la sélection contient des composants essentiels.\n\n{list}\n\n" +
-                "Les supprimer peut empêcher d'autres logiciels ou votre matériel de fonctionner. Continuer quand même ?",
-                "Composants protégés", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+                L.F("Attention : la sélection contient des composants essentiels.\n\n{0}\n\n" +
+                "Les supprimer peut empêcher d'autres logiciels ou votre matériel de fonctionner. Continuer quand même ?", list),
+                L.T("Composants protégés"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
             if (again != MessageBoxResult.Yes)
                 return;
         }

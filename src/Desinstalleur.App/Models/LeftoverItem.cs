@@ -1,3 +1,4 @@
+using Desinstalleur.App.Services;
 using Desinstalleur.Core;
 using Microsoft.Win32;
 
@@ -33,9 +34,9 @@ public sealed class LeftoverItem : ObservableObject
 
     public string KindText => Kind switch
     {
-        LeftoverKind.Folder => "Dossier",
-        LeftoverKind.File => "Fichier",
-        _ => "Registre",
+        LeftoverKind.Folder => L.T("Dossier"),
+        LeftoverKind.File => L.T("Fichier"),
+        _ => L.T("Registre"),
     };
 
     /// <summary>Glyphe de la police Segoe Fluent Icons / MDL2 Assets.</summary>
@@ -48,7 +49,7 @@ public sealed class LeftoverItem : ObservableObject
 
     public string SizeText => Kind == LeftoverKind.RegistryKey ? string.Empty : ValueParsers.FormatSize(SizeBytes);
 
-    public string ConfidenceText => Confidence == MatchConfidence.High ? "Sûr" : "À vérifier";
+    public string ConfidenceText => Confidence == MatchConfidence.High ? L.T("Sûr") : L.T("À vérifier");
 
     public bool IsSelected
     {

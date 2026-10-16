@@ -22,18 +22,18 @@ public static class RestorePoint
                 RedirectStandardOutput = true,
             });
             if (process is null)
-                return "PowerShell n'a pas pu être lancé.";
+                return L.T("PowerShell n'a pas pu être lancé.");
 
             var error = process.StandardError.ReadToEndAsync();
             _ = process.StandardOutput.ReadToEndAsync();
             if (!process.WaitForExit(180_000))
-                return "La création du point de restauration a pris trop de temps.";
+                return L.T("La création du point de restauration a pris trop de temps.");
 
             if (process.ExitCode != 0)
             {
                 var message = error.Result.Trim();
                 Journal.Write("Point de restauration impossible : " + message);
-                return "La protection du système est peut-être désactivée sur ce PC.";
+                return L.T("La protection du système est peut-être désactivée sur ce PC.");
             }
 
             Journal.Write("Point de restauration demandé : " + description);

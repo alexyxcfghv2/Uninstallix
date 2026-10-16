@@ -15,9 +15,9 @@ public partial class UpdateWindow : Window
     {
         InitializeComponent();
         _update = update;
-        TitleText.Text = $"Uninstallix {update.Version.ToString(3)} est disponible";
-        VersionText.Text = $"Vous avez la version {SelfInstaller.Version}  ·  téléchargement de {ValueParsers.FormatSize(update.Size)}";
-        NotesText.Text = string.IsNullOrWhiteSpace(update.Notes) ? "Pas de description pour cette version." : CleanMarkdown(update.Notes);
+        TitleText.Text = L.F("Uninstallix {0} est disponible", update.Version.ToString(3));
+        VersionText.Text = L.F("Vous avez la version {0}  ·  téléchargement de {1}", SelfInstaller.Version, ValueParsers.FormatSize(update.Size));
+        NotesText.Text = string.IsNullOrWhiteSpace(update.Notes) ? L.T("Pas de description pour cette version.") : CleanMarkdown(update.Notes);
         Loaded += (_, _) =>
         {
             Anim.Pop(Badge);
@@ -47,17 +47,17 @@ public partial class UpdateWindow : Window
     {
         InstallButton.IsEnabled = false;
         ProgressPanel.Visibility = Visibility.Visible;
-        ProgressText.Text = "Téléchargement…";
+        ProgressText.Text = L.T("Téléchargement…");
         _download = new CancellationTokenSource();
         try
         {
             var progress = new Progress<double>(p =>
             {
                 DownloadBar.Value = p;
-                ProgressText.Text = $"Téléchargement… {p:0} %";
+                ProgressText.Text = L.F("Téléchargement… {0:0} %", p);
             });
             var path = await UpdateChecker.DownloadAsync(_update, progress, _download.Token);
-            ProgressText.Text = "Lancement de l'installation…";
+            ProgressText.Text = L.T("Lancement de l'installation…");
             UpdateChecker.RunInstaller(path);
             Application.Current.Shutdown();
         }
@@ -69,7 +69,7 @@ public partial class UpdateWindow : Window
         catch (Exception ex)
         {
             Journal.Write("Mise à jour impossible : " + ex);
-            ProgressText.Text = "La mise à jour a échoué : " + ex.Message;
+            ProgressText.Text = L.F("La mise à jour a échoué : {0}", ex.Message);
             InstallButton.IsEnabled = true;
         }
     }

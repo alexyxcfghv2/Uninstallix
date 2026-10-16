@@ -14,14 +14,14 @@ public partial class SetupWindow : Window
     public SetupWindow()
     {
         InitializeComponent();
-        VersionLabel.Text = $"Version {SelfInstaller.Version}  ·  Désinstalleur et nettoyeur pour Windows";
+        VersionLabel.Text = L.F("Version {0}  ·  Désinstalleur et nettoyeur pour Windows", SelfInstaller.Version);
 
         var existing = SelfInstaller.ExistingInstallFolder();
         FolderBox.Text = existing ?? SelfInstaller.DefaultFolder;
         if (existing is not null)
         {
-            TitleLabel.Text = "Mettre à jour Uninstallix";
-            InstallButtonText.Text = "Mettre à jour";
+            TitleLabel.Text = L.T("Mettre à jour Uninstallix");
+            InstallButtonText.Text = L.T("Mettre à jour");
             UpdateNote.Visibility = Visibility.Visible;
         }
     }
@@ -40,7 +40,7 @@ public partial class SetupWindow : Window
 
     private void Browse_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog { Title = "Choisissez le dossier où installer Uninstallix" };
+        var dialog = new OpenFolderDialog { Title = L.T("Choisissez le dossier où installer Uninstallix") };
         if (dialog.ShowDialog(this) != true)
             return;
         // Comme les installateurs classiques : on crée un sous-dossier « Uninstallix » dans le dossier choisi.
@@ -55,7 +55,7 @@ public partial class SetupWindow : Window
         var folder = FolderBox.Text.Trim().Trim('"');
         if (!IsValidFolder(folder, out var problem))
         {
-            MessageBox.Show(this, problem, "Dossier d'installation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(this, problem, L.T("Dossier d'installation"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -76,7 +76,7 @@ public partial class SetupWindow : Window
         catch (Exception ex)
         {
             Journal.Write("Échec de l'installation : " + ex);
-            MessageBox.Show(this, "L'installation a échoué :\n\n" + ex.Message, "Uninstallix",
+            MessageBox.Show(this, L.F("L'installation a échoué :\n\n{0}", ex.Message), "Uninstallix",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             ProgressStep.Visibility = Visibility.Collapsed;
             OptionsStep.Visibility = Visibility.Visible;
@@ -94,8 +94,10 @@ public partial class SetupWindow : Window
         DoneStep.Visibility = Visibility.Visible;
         Anim.FadeSlideIn(DoneStep);
         Anim.Pop(DoneCheck, 150);
-        DoneText.Text = $"Installé dans {folder}." + (desktop || startMenu
-            ? " Vous le retrouverez " + (desktop && startMenu ? "sur le Bureau et dans le menu Démarrer." : desktop ? "sur le Bureau." : "dans le menu Démarrer.")
+        DoneText.Text = L.F("Installé dans {0}.", folder) + (desktop && startMenu
+            ? " " + L.T("Vous le retrouverez sur le Bureau et dans le menu Démarrer.")
+            : desktop ? " " + L.T("Vous le retrouverez sur le Bureau.")
+            : startMenu ? " " + L.T("Vous le retrouverez dans le menu Démarrer.")
             : string.Empty);
         InstallButton.Visibility = Visibility.Collapsed;
         CancelButton.Visibility = Visibility.Collapsed;
@@ -109,7 +111,7 @@ public partial class SetupWindow : Window
         {
             if (string.IsNullOrWhiteSpace(folder) || !Path.IsPathFullyQualified(folder))
             {
-                problem = "Indiquez un chemin complet, par exemple C:\\Program Files\\Uninstallix.";
+                problem = L.F("Indiquez un chemin complet, par exemple {0}.", @"C:\Program Files\Uninstallix");
                 return false;
             }
             var full = Path.GetFullPath(folder).TrimEnd('\\');
@@ -118,19 +120,19 @@ public partial class SetupWindow : Window
             if (string.Equals(full, root, StringComparison.OrdinalIgnoreCase) ||
                 full.StartsWith(windows, StringComparison.OrdinalIgnoreCase))
             {
-                problem = "Choisissez un dossier dédié (pas la racine d'un disque ni le dossier Windows).";
+                problem = L.T("Choisissez un dossier dédié (pas la racine d'un disque ni le dossier Windows).");
                 return false;
             }
             if (!Directory.Exists(root + "\\"))
             {
-                problem = "Ce disque n'existe pas.";
+                problem = L.T("Ce disque n'existe pas.");
                 return false;
             }
             return true;
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
         {
-            problem = "Ce chemin n'est pas valide.";
+            problem = L.T("Ce chemin n'est pas valide.");
             return false;
         }
     }

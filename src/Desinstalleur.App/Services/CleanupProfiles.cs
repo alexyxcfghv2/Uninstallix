@@ -9,6 +9,9 @@ public static class CleanupProfiles
 
     public static readonly string[] All = { Custom, Gaming, Browsers };
 
+    /// <summary>Nom affiché d'un profil (le nom français reste l'identifiant enregistré).</summary>
+    public static string DisplayName(string profile) => L.T(profile);
+
     public static Dictionary<string, List<string>> Defaults() => new()
     {
         [Custom] = new() { "Fichiers temporaires", "FiveM", "Discord", "Rapports d'erreurs" },

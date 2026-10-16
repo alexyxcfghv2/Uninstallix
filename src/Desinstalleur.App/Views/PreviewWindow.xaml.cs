@@ -37,8 +37,10 @@ public partial class PreviewWindow : Window
         Anim.CountBytes(TotalText, total);
         var files = previews.Sum(p => p.TotalFiles);
         SubtitleText.Text = files == 0
-            ? "Rien à supprimer pour le moment : ces caches sont déjà vides."
-            : $"{files} fichier(s) seront supprimés définitivement. Ils seront recréés si besoin ; vos jeux, comptes et réglages ne sont pas touchés.";
+            ? L.T("Rien à supprimer pour le moment : ces caches sont déjà vides.")
+            : L.F(files > 1
+                ? "{0} fichiers seront supprimés définitivement. Ils seront recréés si besoin ; vos jeux, comptes et réglages ne sont pas touchés."
+                : "{0} fichier sera supprimé définitivement. Il sera recréé si besoin ; vos jeux, comptes et réglages ne sont pas touchés.", files);
         CleanButton.IsEnabled = files > 0;
         await RefreshRunningAsync();
     }
@@ -47,8 +49,10 @@ public partial class PreviewWindow : Window
     {
         var running = await Task.Run(() => CacheCleaner.RunningApps(_targets).ToList());
         RunningCard.Visibility = running.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-        RunningText.Text = $"{string.Join(", ", running)} {(running.Count > 1 ? "sont ouverts" : "est ouvert")}. " +
-                           "Fermez-les pour un nettoyage complet ; sinon, les fichiers utilisés seront simplement ignorés.";
+        RunningText.Text = L.F(running.Count > 1
+            ? "{0} sont ouverts. Fermez-les pour un nettoyage complet ; sinon, les fichiers utilisés seront simplement ignorés."
+            : "{0} est ouvert. Fermez-le pour un nettoyage complet ; sinon, les fichiers utilisés seront simplement ignorés.",
+            string.Join(", ", running));
         if (running.Count > 0)
             Anim.FadeSlideIn(RunningCard, 8);
     }
@@ -56,7 +60,7 @@ public partial class PreviewWindow : Window
     private async void CloseApps_Click(object sender, RoutedEventArgs e)
     {
         CloseAppsButton.IsEnabled = false;
-        RunningText.Text = "Fermeture en cours…";
+        RunningText.Text = L.T("Fermeture en cours…");
         var still = await Task.Run(() => CacheCleaner.CloseApps(_targets));
         CloseAppsButton.IsEnabled = true;
         if (still.Count == 0)
@@ -64,8 +68,10 @@ public partial class PreviewWindow : Window
             RunningCard.Visibility = Visibility.Collapsed;
             return;
         }
-        RunningText.Text = $"{string.Join(", ", still)} ne s'est pas fermé (une fenêtre demande peut-être une confirmation). " +
-                           "Fermez-le vous-même, ou continuez : les fichiers utilisés seront ignorés.";
+        RunningText.Text = L.F(still.Count > 1
+            ? "{0} ne se sont pas fermés (une fenêtre demande peut-être une confirmation). Fermez-les vous-même, ou continuez : les fichiers utilisés seront ignorés."
+            : "{0} ne s'est pas fermé (une fenêtre demande peut-être une confirmation). Fermez-le vous-même, ou continuez : les fichiers utilisés seront ignorés.",
+            string.Join(", ", still));
     }
 
     private void Entry_Click(object sender, MouseButtonEventArgs e)

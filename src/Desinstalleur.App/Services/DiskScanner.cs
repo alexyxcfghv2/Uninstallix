@@ -25,8 +25,10 @@ public sealed class DiskNode
     public double Percent { get; set; }
     public string Glyph => !IsReal ? "" : IsFolder ? "" : "";
     public string SizeText => ValueParsers.FormatSize(SizeBytes);
-    public string PercentText => Percent >= 0.1 ? $"{Percent:0.#} %" : "< 0,1 %";
-    public string Detail => IsFolder ? $"{FileCount:N0} fichier(s)" : !IsReal ? $"{FileCount:N0} fichier(s) de moins de 25 Mo" : "Fichier";
+    public string PercentText => Percent >= 0.1 ? L.F("{0:0.#} %", Percent) : L.T("< 0,1 %");
+    public string Detail => IsFolder ? L.F(FileCount > 1 ? "{0:N0} fichiers" : "{0:N0} fichier", FileCount)
+        : !IsReal ? L.F(FileCount > 1 ? "{0:N0} fichiers de moins de 25 Mo" : "{0:N0} fichier de moins de 25 Mo", FileCount)
+        : L.T("Fichier");
 }
 
 /// <summary>
@@ -186,7 +188,7 @@ public sealed class DiskScanner
         {
             rows.Add(new DiskNode
             {
-                Name = "Petits fichiers et dossiers",
+                Name = L.T("Petits fichiers et dossiers"),
                 FullPath = folder.FullPath,
                 IsFolder = false,
                 IsReal = false,

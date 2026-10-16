@@ -51,18 +51,18 @@ public static class SelfInstaller
     /// <summary>Copie l'appli, crée les raccourcis et l'entrée « Applications installées ». Renvoie le chemin de l'exe installé.</summary>
     public static string Install(string folder, bool desktopShortcut, bool startMenuShortcut, Action<string> progress)
     {
-        var source = Environment.ProcessPath ?? throw new InvalidOperationException("Chemin de l'installateur introuvable.");
+        var source = Environment.ProcessPath ?? throw new InvalidOperationException(L.T("Chemin de l'installateur introuvable."));
         folder = Path.GetFullPath(folder);
         var target = Path.Combine(folder, ExeName);
 
-        progress("Fermeture d'Uninstallix s'il est ouvert…");
+        progress(L.T("Fermeture d'Uninstallix s'il est ouvert…"));
         CloseOtherInstances();
 
-        progress("Copie des fichiers…");
+        progress(L.T("Copie des fichiers…"));
         Directory.CreateDirectory(folder);
         CopyWithRetry(source, target);
 
-        progress("Création des raccourcis…");
+        progress(L.T("Création des raccourcis…"));
         var desktopLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), ShortcutName);
         var startLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms), ShortcutName);
         if (desktopShortcut)
@@ -74,7 +74,7 @@ public static class SelfInstaller
         else
             DeleteFile(startLink);
 
-        progress("Inscription dans Windows…");
+        progress(L.T("Inscription dans Windows…"));
         using (var key = Registry.LocalMachine.CreateSubKey(UninstallKey, writable: true))
         {
             key.SetValue("DisplayName", "Uninstallix");
@@ -173,7 +173,7 @@ public static class SelfInstaller
 
     private static void CreateShortcut(string linkPath, string target, string workingDirectory)
     {
-        var shellType = Type.GetTypeFromProgID("WScript.Shell") ?? throw new InvalidOperationException("WScript.Shell indisponible.");
+        var shellType = Type.GetTypeFromProgID("WScript.Shell") ?? throw new InvalidOperationException(L.T("WScript.Shell indisponible."));
         dynamic shell = Activator.CreateInstance(shellType)!;
         try
         {
@@ -182,7 +182,7 @@ public static class SelfInstaller
             link.TargetPath = target;
             link.WorkingDirectory = workingDirectory;
             link.IconLocation = target + ",0";
-            link.Description = "Désinstalleur et nettoyeur pour Windows";
+            link.Description = L.T("Désinstalleur et nettoyeur pour Windows");
             link.Save();
         }
         finally

@@ -70,7 +70,7 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Kind}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding KindText}" FontWeight="SemiBold" />
                                                 <TextBlock Text="{Binding DateText}" Style="{StaticResource SecondaryText}" FontSize="12"
                                                            Margin="10,1,0,0" VerticalAlignment="Center" />
                                             </StackPanel>
