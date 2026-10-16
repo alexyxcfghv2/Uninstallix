@@ -125,10 +125,11 @@ Le dépôt GitHub [alexyxcfghv2/Uninstallix](https://github.com/alexyxcfghv2/Uni
 
 1. Changer `<Version>` dans `src/Desinstalleur.App/Desinstalleur.App.csproj` et écrire les nouveautés dans
    `release-notes/vX.Y.Z.md`.
-2. Pousser une étiquette `vX.Y.Z` (`git tag v0.7.0 && git push origin v0.7.0`).
-3. GitHub Actions (`.github/workflows/release.yml`) compile sous Windows, lance les tests, fabrique
-   `Uninstallix-Setup.exe` et crée la version. Les applis déjà installées la proposent alors à leur prochain
-   démarrage (ou via Réglages › Mises à jour), avec ses nouveautés ; l'utilisateur choisit de l'installer.
+2. Envoyer sur `main`.
+3. GitHub Actions (`.github/workflows/release.yml`) voit que cette version n'est pas encore publiée, compile sous
+   Windows, lance les tests, fabrique `Uninstallix-Setup.exe` et crée la version `vX.Y.Z`. Les applis déjà
+   installées la proposent alors à leur prochain démarrage (ou via Réglages › Mises à jour), avec ses nouveautés ;
+   l'utilisateur choisit de l'installer.
 
 Le téléchargement est vérifié avec l'empreinte SHA-256 fournie par GitHub.
 
