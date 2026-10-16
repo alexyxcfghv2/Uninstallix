@@ -3,37 +3,39 @@
 </p>
 
 <p align="center">
-  <b>Désinstalleur et nettoyeur pour Windows 10 et 11</b><br>
-  Désinstallez proprement, videz les caches et libérez de la place, sans laisser de traces.
+  <b>Uninstaller and cleaner for Windows 10 and 11</b><br>
+  Uninstall programs cleanly, clear caches and free up space, without leaving anything behind.
 </p>
 
 <p align="center">
   <a href="https://github.com/alexyxcfghv2/Uninstallix/releases/latest/download/Uninstallix-Setup.exe">
-    <b>⬇️ Télécharger Uninstallix-Setup.exe</b>
+    <b>⬇️ Download Uninstallix-Setup.exe</b>
   </a>
+</p>
+
+<p align="center">
+  Available in English and French: the app follows your Windows language.
 </p>
 
 ## Installation
 
-1. Téléchargez **Uninstallix-Setup.exe** avec le lien ci-dessus.
-2. Double-cliquez dessus et acceptez la demande d'autorisation de Windows.
-3. Choisissez le dossier d'installation et les raccourcis, puis cliquez sur **Installer**.
+1. Download **Uninstallix-Setup.exe** with the link above.
+2. Double-click it and accept the Windows permission prompt.
+3. Pick the install folder and shortcuts, then click **Install**.
 
-Rien d'autre à installer : tout est inclus. Uninstallix vous prévient ensuite tout seul quand une nouvelle
-version sort.
+Nothing else to install: everything is included. Uninstallix tells you by itself when a new version is out.
 
-## Ce que fait Uninstallix
+## What Uninstallix does
 
-- **Logiciels** : liste avec taille et date, recherche, tri, désinstallation d'un ou plusieurs logiciels à la suite,
-  puis recherche des restes (fichiers, dossiers, registre). Rien n'est supprimé sans votre accord, et les
-  composants essentiels de Windows sont protégés.
-- **Nettoyage** : caches de FiveM, Discord, Chrome, Edge, Steam, Roblox, shaders, fichiers temporaires et Corbeille,
-  avec un aperçu de ce qui sera supprimé et des profils (Gaming, Navigateurs, Personnalisé). Libération de la RAM
-  et vidage du cache DNS.
-- **Espace disque** : trouvez ce qui prend le plus de place.
-- **Historique**, **favoris protégés** et **réglages** (point de restauration, Corbeille, animations…).
+- **Programs**: list with size and date, search, sorting, uninstall one or several programs in a row,
+  then scan for leftovers (files, folders, registry). Nothing is deleted without your approval, and essential
+  Windows components are protected.
+- **Cleanup**: caches of FiveM, Discord, Chrome, Edge, Steam, Roblox, shaders, temporary files and the Recycle Bin,
+  with a preview of what will be deleted and profiles (Gaming, Browsers, Custom). Frees RAM and flushes the DNS cache.
+- **Disk space**: find what takes the most room.
+- **History**, **protected favorites** and **settings** (restore point, Recycle Bin, animations, language…).
 
-## Licence
+## License
 
-© 2026 alexy. **Tous droits réservés.** Utilisation gratuite à titre personnel ; copie, modification et
-redistribution interdites sans autorisation. Voir [LICENSE](LICENSE).
+© 2026 alexy. **All rights reserved.** Free for personal use; copying, modifying and redistributing are
+forbidden without permission. See [LICENSE](LICENSE).

@@ -42,12 +42,15 @@ public static class ValueParsers
         return kb > 0 ? kb * 1024 : null;
     }
 
+    /// <summary>Unités anglaises (B, KB, MB…) et point décimal au lieu de Ko, Mo… et de la virgule.</summary>
+    public static bool EnglishUnits { get; set; }
+
     public static string FormatSize(long? bytes)
     {
         if (bytes is null or <= 0)
             return "—";
 
-        string[] units = { "o", "Ko", "Mo", "Go", "To" };
+        string[] units = EnglishUnits ? new[] { "B", "KB", "MB", "GB", "TB" } : new[] { "o", "Ko", "Mo", "Go", "To" };
         double size = bytes.Value;
         var unit = 0;
         while (size >= 1024 && unit < units.Length - 1)
@@ -56,6 +59,6 @@ public static class ValueParsers
             unit++;
         }
         var format = unit == 0 || size >= 100 ? "0" : "0.#";
-        return size.ToString(format, French) + " " + units[unit];
+        return size.ToString(format, EnglishUnits ? CultureInfo.InvariantCulture : French) + " " + units[unit];
     }
 }

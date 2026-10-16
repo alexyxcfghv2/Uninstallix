@@ -10,6 +10,7 @@ public partial class App : Application
     {
         DispatcherUnhandledException += OnUnhandledException;
         base.OnStartup(e);
+        L.Init(AppSettings.Current.Language);
 
         if (SelfInstaller.IsUninstallMode(e.Args))
         {

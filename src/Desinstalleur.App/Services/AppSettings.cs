@@ -28,6 +28,9 @@ public sealed class AppSettings
     /// <summary>Le nettoyage ne touche pas aux fichiers temporaires de moins de 24 h.</summary>
     public bool KeepRecentTempFiles { get; set; } = true;
 
+    /// <summary>Langue de l'interface : « auto » (celle de Windows), « fr » ou « en ».</summary>
+    public string Language { get; set; } = "auto";
+
     /// <summary>Petites animations de l'interface (apparitions, compteurs).</summary>
     public bool EnableAnimations { get; set; } = true;
 
