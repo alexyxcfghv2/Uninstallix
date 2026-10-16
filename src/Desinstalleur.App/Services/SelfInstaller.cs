@@ -79,7 +79,7 @@ public static class SelfInstaller
         {
             key.SetValue("DisplayName", "Uninstallix");
             key.SetValue("DisplayVersion", Version);
-            key.SetValue("Publisher", "Uninstallix");
+            key.SetValue("Publisher", "alexy");
             key.SetValue("DisplayIcon", target + ",0");
             key.SetValue("InstallLocation", folder);
             key.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));

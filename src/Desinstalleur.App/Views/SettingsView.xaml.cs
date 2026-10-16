@@ -24,7 +24,8 @@ public partial class SettingsView : UserControl
         UpdateStatusText.Text = $"Uninstallix {SelfInstaller.Version}";
 
         AboutText.Text = $"Version {version?.Major}.{version?.Minor}.{version?.Build}  ·  Désinstalleur et nettoyeur pour Windows.\n" +
-                         $"Journal, réglages et sauvegardes : {Journal.Folder}";
+                         $"Journal, réglages et sauvegardes : {Journal.Folder}\n" +
+                         "© 2026 alexy. Tous droits réservés. Logiciel propriétaire : copie, modification et redistribution interdites sans autorisation.";
     }
 
     private void Setting_Changed(object sender, RoutedEventArgs e) => AppSettings.Current.Save();

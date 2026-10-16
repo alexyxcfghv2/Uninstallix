@@ -212,3 +212,10 @@ Le code a été écrit et vérifié sur une machine Linux, sans Windows :
 - ✅ La version 0.3 (menu latéral, Nettoyage, Réglages) a été lancée sur Windows par l'utilisateur.
 - ✅ L'installateur (0.4), les animations et l'optimisation mémoire (0.5) ont été essayés sur Windows par l'utilisateur.
 - ❌ Les nouveautés 0.6 (aperçu, profils, espace disque, historique, favoris, rapport) n'ont pas encore été essayées sur Windows.
+
+## Licence
+
+© 2026 alexy. **Tous droits réservés.** Uninstallix est un logiciel propriétaire, pas un logiciel libre :
+vous pouvez télécharger l'installateur officiel et l'utiliser gratuitement, mais toute copie, modification,
+redistribution ou réutilisation du code, du nom ou du logo est interdite sans autorisation écrite.
+Voir [LICENSE](LICENSE).

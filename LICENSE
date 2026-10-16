@@ -1,0 +1,32 @@
+Uninstallix — Licence propriétaire
+Copyright (c) 2026 alexy (github.com/alexyxcfghv2). Tous droits réservés.
+
+Uninstallix, son code source, son nom, son logo et ses visuels sont la propriété exclusive de leur auteur.
+Le fait que le code soit visible sur GitHub ne donne aucun droit sur lui.
+
+CE QUI EST AUTORISÉ
+- Télécharger l'installateur officiel (Uninstallix-Setup.exe) depuis la page « Releases » de ce dépôt.
+- Installer et utiliser Uninstallix gratuitement sur vos propres ordinateurs, pour un usage personnel.
+- Lire le code source pour comprendre ce que fait le logiciel.
+
+CE QUI EST INTERDIT sans l'accord écrit préalable de l'auteur
+- Copier, réutiliser ou adapter tout ou partie du code source, du nom, du logo ou des visuels.
+- Modifier le logiciel, ou publier une version modifiée, dérivée ou « renommée ».
+- Redistribuer, revendre, louer, héberger ou partager le logiciel ou son installateur ailleurs que depuis
+  ce dépôt officiel, gratuitement ou contre paiement.
+- Retirer ou modifier les mentions de droits d'auteur.
+- Utiliser le code pour entraîner, construire ou alimenter un autre produit.
+
+AUCUNE GARANTIE
+Uninstallix est fourni « tel quel », sans garantie d'aucune sorte. L'auteur ne pourra être tenu responsable
+d'une perte de données ou d'un dommage lié à son utilisation. Pensez au point de restauration proposé
+par l'application.
+
+Pour toute demande d'autorisation : ouvrez une « issue » sur ce dépôt.
+
+---
+
+English summary: Copyright (c) 2026 alexy. All rights reserved. This is proprietary software, not open source.
+You may download the official installer from this repository's Releases page and use it for free for personal
+use. Copying, modifying, redistributing, selling or reusing any part of the code, name, logo or artwork is
+forbidden without the author's prior written permission. Provided "as is", without warranty.

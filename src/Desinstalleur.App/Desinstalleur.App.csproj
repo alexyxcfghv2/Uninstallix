@@ -15,6 +15,9 @@
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
     <Product>Uninstallix</Product>
+    <Company>alexy</Company>
+    <Authors>alexy</Authors>
+    <Copyright>Copyright (c) 2026 alexy. Tous droits réservés.</Copyright>
     <ApplicationIcon>Assets\uninstallix.ico</ApplicationIcon>
   </PropertyGroup>
 
