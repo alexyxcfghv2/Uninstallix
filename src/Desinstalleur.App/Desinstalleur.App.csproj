@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Uninstallix</AssemblyName>
+    <RootNamespace>Desinstalleur.App</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>0.6.0</Version>
+    <TieredPGO>true</TieredPGO>
+    <!-- Mémoire : ramasse-miettes économe (pas de thread de fond, tas compacté plus souvent). -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <Product>Uninstallix</Product>
+    <ApplicationIcon>Assets\uninstallix.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\logo-mark.png" />
+    <Resource Include="Assets\logo-full.png" />
+    <Resource Include="Assets\uninstallix.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.GC.ConserveMemory" Value="7" />
+    <RuntimeHostConfigurationOption Include="System.GC.RetainVM" Value="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Desinstalleur.Core\Desinstalleur.Core.csproj" />
+  </ItemGroup>
+
+</Project>

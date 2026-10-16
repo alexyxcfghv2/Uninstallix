@@ -1,0 +1,55 @@
+# Publie une nouvelle version : il suffit de pousser une étiquette « vX.Y.Z ».
+# GitHub compile Uninstallix sous Windows, lance les tests, fabrique Uninstallix-Setup.exe
+# et crée la « Release » que l'appli détecte toute seule.
+name: Publier une version
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Étiquette à publier (ex. v0.7.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Tests du moteur
+        run: dotnet test tests/Desinstalleur.Core.Tests -c Release
+
+      - name: Fabrication de Uninstallix-Setup.exe
+        shell: pwsh
+        run: |
+          $version = $env:TAG.TrimStart('v')
+          dotnet publish src/Desinstalleur.App -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true -p:PublishReadyToRun=true -p:DebugType=none `
+            -p:Version=$version -o setup-build
+          Copy-Item setup-build/Uninstallix.exe Uninstallix-Setup.exe
+
+      - name: Création de la version sur GitHub
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = "release-notes/$($env:TAG).md"
+          if (-not (Test-Path $notes)) {
+            Set-Content -Path notes.md -Value "Nouvelle version d'Uninstallix." -Encoding utf8
+            $notes = "notes.md"
+          }
+          gh release create $env:TAG Uninstallix-Setup.exe --title "Uninstallix $($env:TAG.TrimStart('v'))" --notes-file $notes

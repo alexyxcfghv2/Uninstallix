@@ -1,0 +1,6 @@
+<Project>
+  <!-- Permet de lancer l'appli et les tests avec un .NET plus récent (ex. .NET 10) si .NET 8 n'est pas installé. -->
+  <PropertyGroup>
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+</Project>

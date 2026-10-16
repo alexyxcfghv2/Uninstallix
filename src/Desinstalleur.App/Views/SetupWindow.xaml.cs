@@ -1,0 +1,162 @@
+using System.Diagnostics;
+using System.Windows;
+using Desinstalleur.App.Services;
+using Microsoft.Win32;
+
+namespace Desinstalleur.App.Views;
+
+/// <summary>Assistant d'installation : affiché quand l'exe s'appelle « Uninstallix-Setup.exe ».</summary>
+public partial class SetupWindow : Window
+{
+    private string? _installedExe;
+    private bool _installing;
+
+    public SetupWindow()
+    {
+        InitializeComponent();
+        VersionLabel.Text = $"Version {SelfInstaller.Version}  ·  Désinstalleur et nettoyeur pour Windows";
+
+        var existing = SelfInstaller.ExistingInstallFolder();
+        FolderBox.Text = existing ?? SelfInstaller.DefaultFolder;
+        if (existing is not null)
+        {
+            TitleLabel.Text = "Mettre à jour Uninstallix";
+            InstallButtonText.Text = "Mettre à jour";
+            UpdateNote.Visibility = Visibility.Visible;
+        }
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        WindowTheme.ApplyDarkTitleBar(this);
+    }
+
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+        Anim.FadeSlideIn(Header, 12, 420);
+        Anim.FadeSlideIn(OptionsStep, 18, 450, 140);
+    }
+
+    private void Browse_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog { Title = "Choisissez le dossier où installer Uninstallix" };
+        if (dialog.ShowDialog(this) != true)
+            return;
+        // Comme les installateurs classiques : on crée un sous-dossier « Uninstallix » dans le dossier choisi.
+        var chosen = dialog.FolderName;
+        FolderBox.Text = Path.GetFileName(chosen.TrimEnd('\\')).Equals("Uninstallix", StringComparison.OrdinalIgnoreCase)
+            ? chosen
+            : Path.Combine(chosen, "Uninstallix");
+    }
+
+    private async void Install_Click(object sender, RoutedEventArgs e)
+    {
+        var folder = FolderBox.Text.Trim().Trim('"');
+        if (!IsValidFolder(folder, out var problem))
+        {
+            MessageBox.Show(this, problem, "Dossier d'installation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var desktop = DesktopBox.IsChecked == true;
+        var startMenu = StartMenuBox.IsChecked == true;
+        OptionsStep.Visibility = Visibility.Collapsed;
+        ProgressStep.Visibility = Visibility.Visible;
+        Anim.FadeSlideIn(ProgressStep);
+        InstallButton.IsEnabled = false;
+        CancelButton.IsEnabled = false;
+        _installing = true;
+
+        try
+        {
+            _installedExe = await Task.Run(() => SelfInstaller.Install(folder, desktop, startMenu,
+                text => Dispatcher.Invoke(() => ProgressText.Text = text)));
+        }
+        catch (Exception ex)
+        {
+            Journal.Write("Échec de l'installation : " + ex);
+            MessageBox.Show(this, "L'installation a échoué :\n\n" + ex.Message, "Uninstallix",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            ProgressStep.Visibility = Visibility.Collapsed;
+            OptionsStep.Visibility = Visibility.Visible;
+            Anim.FadeSlideIn(OptionsStep);
+            InstallButton.IsEnabled = true;
+            CancelButton.IsEnabled = true;
+            return;
+        }
+        finally
+        {
+            _installing = false;
+        }
+
+        ProgressStep.Visibility = Visibility.Collapsed;
+        DoneStep.Visibility = Visibility.Visible;
+        Anim.FadeSlideIn(DoneStep);
+        Anim.Pop(DoneCheck, 150);
+        DoneText.Text = $"Installé dans {folder}." + (desktop || startMenu
+            ? " Vous le retrouverez " + (desktop && startMenu ? "sur le Bureau et dans le menu Démarrer." : desktop ? "sur le Bureau." : "dans le menu Démarrer.")
+            : string.Empty);
+        InstallButton.Visibility = Visibility.Collapsed;
+        CancelButton.Visibility = Visibility.Collapsed;
+        FinishButton.Visibility = Visibility.Visible;
+    }
+
+    private static bool IsValidFolder(string folder, out string problem)
+    {
+        problem = string.Empty;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(folder) || !Path.IsPathFullyQualified(folder))
+            {
+                problem = "Indiquez un chemin complet, par exemple C:\\Program Files\\Uninstallix.";
+                return false;
+            }
+            var full = Path.GetFullPath(folder).TrimEnd('\\');
+            var root = Path.GetPathRoot(full)?.TrimEnd('\\');
+            var windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows).TrimEnd('\\');
+            if (string.Equals(full, root, StringComparison.OrdinalIgnoreCase) ||
+                full.StartsWith(windows, StringComparison.OrdinalIgnoreCase))
+            {
+                problem = "Choisissez un dossier dédié (pas la racine d'un disque ni le dossier Windows).";
+                return false;
+            }
+            if (!Directory.Exists(root + "\\"))
+            {
+                problem = "Ce disque n'existe pas.";
+                return false;
+            }
+            return true;
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            problem = "Ce chemin n'est pas valide.";
+            return false;
+        }
+    }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void Finish_Click(object sender, RoutedEventArgs e)
+    {
+        if (LaunchBox.IsChecked == true && _installedExe is not null)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(_installedExe) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                Journal.Write("Lancement après installation impossible : " + ex.Message);
+            }
+        }
+        Close();
+    }
+
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (_installing)
+            e.Cancel = true;
+        base.OnClosing(e);
+    }
+}

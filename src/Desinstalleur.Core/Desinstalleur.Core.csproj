@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Logique pure (aucun appel Windows) : testable sur n'importe quelle plateforme. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Desinstalleur.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>

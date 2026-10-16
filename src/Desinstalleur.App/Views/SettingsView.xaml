@@ -1,0 +1,265 @@
+<UserControl x:Class="Desinstalleur.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{StaticResource TextPrimary}">
+
+    <UserControl.Resources>
+        <!-- Une ligne de réglage : titre, explication, interrupteur à droite -->
+        <Style x:Key="SettingRow" TargetType="Border">
+            <Setter Property="Padding" Value="20,14" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style x:Key="SettingTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+            <Setter Property="Margin" Value="4,0,0,8" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,28" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="Réglages" Style="{StaticResource TitleText}" />
+            <TextBlock Text="Les changements sont enregistrés automatiquement." Style="{StaticResource SecondaryText}" Margin="1,3,0,22" />
+
+            <!-- Désinstallation -->
+            <TextBlock Text="DÉSINSTALLATION" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,22">
+                <StackPanel>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding CreateRestorePoint, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Créer un point de restauration" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Avant chaque série de désinstallations, pour pouvoir revenir en arrière avec la restauration du système de Windows."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding PreferQuietUninstall, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Désinstallation silencieuse" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Quand un logiciel le permet, il est désinstallé sans fenêtre ni question."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding AutoSelectSafeLeftovers, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Cocher automatiquement les restes « Sûr »" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Sinon, tous les restes trouvés sont décochés et vous choisissez un par un."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding UseRecycleBin, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Envoyer les restes à la Corbeille" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Recommandé : vous pouvez récupérer un fichier supprimé par erreur. Désactivé, les restes sont supprimés définitivement."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding ShowSystemComponents, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Afficher les composants système au démarrage" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Montre aussi les éléments que Windows cache habituellement dans sa liste."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Apparence -->
+            <TextBlock Text="APPARENCE" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,22">
+                <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                    <DockPanel>
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                  IsChecked="{Binding EnableAnimations, Mode=TwoWay}" Click="Setting_Changed" />
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="Animations" Style="{StaticResource SettingTitle}" />
+                            <TextBlock Text="Apparitions en douceur des pages et des listes, compteurs animés. Désactivez-les sur un PC lent."
+                                       Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Border>
+
+            <!-- Mises à jour -->
+            <TextBlock Text="MISES À JOUR" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,22">
+                <StackPanel>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      IsChecked="{Binding CheckUpdatesOnStartup, Mode=TwoWay}" Click="Setting_Changed" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Chercher les mises à jour au démarrage" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Un bandeau apparaît dans le menu quand une nouvelle version existe. Rien n'est installé sans votre accord."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                        <DockPanel>
+                            <Button x:Name="CheckUpdateButton" DockPanel.Dock="Right" VerticalAlignment="Center" Click="CheckUpdate_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" FontSize="13" Margin="0,0,8,0" />
+                                    <TextBlock Text="Vérifier maintenant" />
+                                </StackPanel>
+                            </Button>
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock x:Name="UpdateStatusTitle" Text="Version installée" Style="{StaticResource SettingTitle}" />
+                                <TextBlock x:Name="UpdateStatusText" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Nettoyage -->
+            <TextBlock Text="NETTOYAGE" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,22">
+                <Border Style="{StaticResource SettingRow}" BorderThickness="0">
+                    <DockPanel>
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                  IsChecked="{Binding KeepRecentTempFiles, Mode=TwoWay}" Click="Setting_Changed" />
+                        <StackPanel Margin="0,0,20,0">
+                            <TextBlock Text="Garder les fichiers temporaires récents" Style="{StaticResource SettingTitle}" />
+                            <TextBlock Text="Ne supprime pas les fichiers temporaires de moins de 24 h, qui peuvent encore servir à une installation en cours."
+                                       Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Border>
+
+            <!-- Favoris protégés -->
+            <TextBlock Text="FAVORIS PROTÉGÉS" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,22">
+                <StackPanel>
+                    <TextBlock Text="Jamais proposés au nettoyage : ni dans les restes après une désinstallation, ni dans les caches. Les logiciels favoris sont marqués « Protégé » dans la liste."
+                               Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,0,0,14" />
+
+                    <DockPanel Margin="0,0,0,8">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Padding="10,5" Click="AddFolder_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE710;" Style="{StaticResource IconText}" FontSize="13" Margin="0,0,6,0" />
+                                <TextBlock Text="Ajouter un dossier…" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="Dossiers" Style="{StaticResource SettingTitle}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <ItemsControl x:Name="FoldersList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource InputBackground}" CornerRadius="9" Padding="12,6,6,6" Margin="0,0,0,6">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Padding="8,4" Click="RemoveFolder_Click"
+                                                ToolTip="Retirer des favoris">
+                                            <TextBlock Text="&#xE711;" Style="{StaticResource IconText}" FontSize="12" />
+                                        </Button>
+                                        <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="13" Foreground="#5AB4FF"
+                                                   Margin="0,0,10,0" DockPanel.Dock="Left" />
+                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="NoFoldersText" Text="Aucun dossier protégé." Style="{StaticResource SecondaryText}" FontSize="12"
+                               Margin="2,0,0,6" />
+
+                    <TextBlock Text="Logiciels" Style="{StaticResource SettingTitle}" Margin="0,14,0,8" />
+                    <ItemsControl x:Name="ProgramsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource InputBackground}" CornerRadius="9" Padding="12,6,6,6" Margin="0,0,0,6">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Padding="8,4" Click="RemoveProgram_Click"
+                                                ToolTip="Retirer des favoris">
+                                            <TextBlock Text="&#xE711;" Style="{StaticResource IconText}" FontSize="12" />
+                                        </Button>
+                                        <TextBlock Text="&#xE735;" Style="{StaticResource IconText}" FontSize="13" Foreground="{StaticResource WarningBrush}"
+                                                   Margin="0,0,10,0" DockPanel.Dock="Left" />
+                                        <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="NoProgramsText" Style="{StaticResource SecondaryText}" FontSize="12" Margin="2,0,0,0" TextWrapping="Wrap"
+                               Text="Aucun logiciel favori. Faites un clic droit sur un logiciel dans la liste › « Ajouter aux favoris protégés »." />
+                </StackPanel>
+            </Border>
+
+            <!-- Outils -->
+            <TextBlock Text="OUTILS" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,22">
+                <StackPanel>
+                    <WrapPanel>
+                        <Button Margin="0,0,10,10" Click="CreateRestorePoint_Click" x:Name="RestorePointButton">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE777;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Créer un point de restauration maintenant" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,0,10,10" Click="OpenJournal_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8A5;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Ouvrir le journal" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,0,10,10" Click="OpenBackups_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Sauvegardes du registre" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,0,10,10" Click="OpenSystemRestore_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE81C;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Restauration du système" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0,0,10,10" Click="ReportProblem_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xED15;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Signaler un problème" />
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+                    <TextBlock x:Name="ToolResultText" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- À propos -->
+            <TextBlock Text="À PROPOS" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Padding="24,20">
+                <StackPanel>
+                    <Image Source="/Assets/logo-full.png" Height="56" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock x:Name="AboutText" Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,12,0,0" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

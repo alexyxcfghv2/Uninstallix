@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+*.user
+TestResults/
+publish/
+tools/verif-linux/stubs/
+setup-build/
+Uninstallix-Setup.exe
