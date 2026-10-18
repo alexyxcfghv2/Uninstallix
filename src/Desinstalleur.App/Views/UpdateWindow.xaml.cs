@@ -17,6 +17,8 @@ public partial class UpdateWindow : Window
         _update = update;
         TitleText.Text = L.F("Uninstallix {0} est disponible", update.Version.ToString(3));
         VersionText.Text = L.F("Vous avez la version {0}  ·  téléchargement de {1}", SelfInstaller.Version, ValueParsers.FormatSize(update.Size));
+        if (PortableMode.IsActive)
+            InstallButtonText.Text = L.T("Mettre à jour la version portable");
         NotesText.Text = string.IsNullOrWhiteSpace(update.Notes) ? L.T("Pas de description pour cette version.") : CleanMarkdown(update.Notes);
         Loaded += (_, _) =>
         {
@@ -57,7 +59,7 @@ public partial class UpdateWindow : Window
                 ProgressText.Text = L.F("Téléchargement… {0:0} %", p);
             });
             var path = await UpdateChecker.DownloadAsync(_update, progress, _download.Token);
-            ProgressText.Text = L.T("Lancement de l'installation…");
+            ProgressText.Text = PortableMode.IsActive ? L.T("Remplacement de la version portable…") : L.T("Lancement de l'installation…");
             UpdateChecker.RunInstaller(path);
             Application.Current.Shutdown();
         }

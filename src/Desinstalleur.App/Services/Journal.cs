@@ -2,11 +2,15 @@ namespace Desinstalleur.App.Services;
 
 /// <summary>
 /// Journal texte de toutes les actions (désinstallations, suppressions, sauvegardes),
-/// dans %LocalAppData%\Uninstallix.
+/// dans %LocalAppData%\Uninstallix (ou « Uninstallix-Data » à côté de l'exe en mode portable).
 /// </summary>
 public static class Journal
 {
-    public static string Folder { get; } = Path.Combine(
+    /// <summary>
+    /// Dossier de toutes les données d'Uninstallix (réglages, journal, historique, sauvegardes, analyses).
+    /// C'est le seul aiguillage du mode portable : toutes les fonctions passent par lui.
+    /// </summary>
+    public static string Folder { get; } = PortableMode.ResolveDataFolder() ?? Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Uninstallix");
 
     public static string RegistryBackupFolder => Path.Combine(Folder, "Sauvegardes registre");

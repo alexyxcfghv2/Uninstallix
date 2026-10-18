@@ -90,6 +90,14 @@ public static class SelfInstaller
         }
 
         RemoveOldScriptInstall(folder);
+
+        // Rappel de nettoyage actif : la tâche planifiée doit lancer l'exe installé.
+        if (AppSettings.Current.CleanupReminder)
+        {
+            progress(L.T("Mise à jour du rappel de nettoyage…"));
+            CleanupReminder.Register(target);
+        }
+
         Journal.Write($"Uninstallix {Version} installé dans {folder}");
         return target;
     }
@@ -102,6 +110,7 @@ public static class SelfInstaller
         DeleteFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), ShortcutName));
         DeleteFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms), ShortcutName));
         Registry.LocalMachine.DeleteSubKeyTree(UninstallKey, throwOnMissingSubKey: false);
+        CleanupReminder.Unregister();
         Journal.Write("Uninstallix désinstallé.");
 
         var targets = new List<string>();

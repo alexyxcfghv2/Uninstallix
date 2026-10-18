@@ -14,6 +14,7 @@
 </p>
 
 <p align="center">
+  No install wanted? <a href="https://github.com/alexyxcfghv2/Uninstallix/releases/latest/download/Uninstallix-Portable.exe">Download the portable version</a>.<br>
   Available in English and French: the app follows your Windows language.
 </p>
 
@@ -31,9 +32,13 @@ Nothing else to install: everything is included. Uninstallix tells you by itself
   then scan for leftovers (files, folders, registry). Nothing is deleted without your approval, and essential
   Windows components are protected.
 - **Cleanup**: caches of FiveM, Discord, Chrome, Edge, Steam, Roblox, shaders, temporary files and the Recycle Bin,
-  with a preview of what will be deleted and profiles (Gaming, Browsers, Custom). Frees RAM and flushes the DNS cache.
-- **Disk space**: find what takes the most room.
-- **History**, **protected favorites** and **settings** (restore point, Recycle Bin, animations, language…).
+  each one explained, with a preview of what will be deleted and profiles (Gaming, Browsers, Custom). Frees RAM and
+  flushes the DNS cache.
+- **Forgotten leftovers**: find folders left behind by programs you already uninstalled, and review them before cleaning.
+- **Startup**: see the apps that start with Windows and turn them off in one click.
+- **Disk space**: find what takes the most room, and see what grew since your last analysis.
+- **History**, **protected favorites**, an optional **cleanup reminder** and **settings** (restore point, Recycle Bin,
+  animations, language…).
 
 ## License
 

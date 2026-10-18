@@ -4,6 +4,30 @@
              xmlns:services="clr-namespace:Desinstalleur.App.Services"
              Foreground="{StaticResource TextPrimary}">
 
+    <UserControl.Resources>
+        <Style x:Key="DiskRowItem" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="10" Padding="10,8" Margin="0,1">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource HoverFill}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SelectedFill}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="28,24,28,22">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -69,6 +93,7 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -108,33 +133,38 @@
                 <ProgressBar x:Name="ScanProgress" Grid.Row="0" VerticalAlignment="Bottom" IsIndeterminate="True" Height="2"
                              Margin="16,0" Visibility="Collapsed" />
 
-                <ListBox x:Name="RowsList" Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="8,4,8,8"
+                <!-- Comparaison avec l'analyse précédente -->
+                <Grid x:Name="CompareBar" Grid.Row="1" Margin="16,2,14,6" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock x:Name="CompareIcon" Text="&#xE81C;" Style="{StaticResource IconText}" FontSize="14"
+                                   Margin="0,0,8,0" Foreground="{StaticResource TextSecondary}" />
+                        <TextBlock x:Name="CompareText" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <Border x:Name="ViewSwitch" Grid.Column="1" Background="{StaticResource CardBackground}"
+                            BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="12" Padding="4">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="AllFoldersButton" GroupName="DiskViewMode" Style="{StaticResource SegmentButton}"
+                                         Content="Tous les dossiers" IsChecked="True" Checked="ViewMode_Checked" />
+                            <RadioButton x:Name="GrownButton" GroupName="DiskViewMode" Style="{StaticResource SegmentButton}"
+                                         Content="Ce qui a grossi" Checked="ViewMode_Checked" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <StackPanel x:Name="FirstScanHint" Grid.Row="1" Orientation="Horizontal" Margin="16,2,14,6" Visibility="Collapsed">
+                    <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" FontSize="13" Margin="0,0,8,0"
+                               Foreground="{StaticResource TextSecondary}" />
+                    <TextBlock Style="{StaticResource SecondaryText}" FontSize="12" TextWrapping="Wrap"
+                               Text="Première analyse de cet emplacement : la prochaine fois, vous verrez ce qui a grossi." />
+                </StackPanel>
+
+                <ListBox x:Name="RowsList" Grid.Row="2" Background="Transparent" BorderThickness="0" Margin="8,4,8,8"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.ScrollUnit="Pixel"
-                         MouseDoubleClick="Rows_DoubleClick">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListBoxItem">
-                                        <Border x:Name="Bd" Background="Transparent" CornerRadius="10" Padding="10,8" Margin="0,1">
-                                            <ContentPresenter />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource HoverFill}" />
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource SelectedFill}" />
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
+                         ItemContainerStyle="{StaticResource DiskRowItem}" MouseDoubleClick="Rows_DoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid services:Anim.EnterOnLoad="True">
@@ -174,7 +204,56 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <TextBlock x:Name="HintText" Grid.Row="1" Style="{StaticResource SecondaryText}" HorizontalAlignment="Center"
+                <ListBox x:Name="GrowthList" Grid.Row="2" Background="Transparent" BorderThickness="0" Margin="8,4,8,8"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" Visibility="Collapsed"
+                         VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.ScrollUnit="Pixel"
+                         ItemContainerStyle="{StaticResource DiskRowItem}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid services:Anim.EnterOnLoad="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource CardBackgroundRaised}" Margin="0,0,12,0">
+                                    <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="15"
+                                               Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <Border x:Name="NewBadge" Style="{StaticResource Badge}" Background="{StaticResource AccentSoft}"
+                                                Margin="8,0,0,0" Padding="7,1" Visibility="Collapsed">
+                                            <TextBlock Text="Nouveau" FontSize="11" Foreground="{StaticResource AccentBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Detail}" Style="{StaticResource SecondaryText}" FontSize="11"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{Binding BeforeAfterText}" Style="{StaticResource SecondaryText}"
+                                           VerticalAlignment="Center" Margin="0,0,14,0" />
+                                <TextBlock Grid.Column="3" Text="{Binding DeltaText}" FontWeight="SemiBold" VerticalAlignment="Center"
+                                           HorizontalAlignment="Right" Foreground="{StaticResource DangerBrush}" />
+                                <Button Grid.Column="4" Style="{StaticResource GhostButton}" Padding="8,6" Margin="10,0,0,0"
+                                        Click="OpenGrowthLocation_Click" ToolTip="Ouvrir l'emplacement dans l'Explorateur">
+                                    <TextBlock Text="&#xE838;" Style="{StaticResource IconText}" FontSize="14" />
+                                </Button>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsNew}" Value="True">
+                                    <Setter TargetName="NewBadge" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock x:Name="GrowthEmptyText" Grid.Row="2" Style="{StaticResource SecondaryText}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="30" Visibility="Collapsed" />
+
+                <TextBlock x:Name="HintText" Grid.Row="2" Style="{StaticResource SecondaryText}" HorizontalAlignment="Center"
                            VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="30"
                            Text="Choisissez un disque en haut pour voir ce qui occupe le plus de place.&#x0a;Double-cliquez sur un dossier pour voir son contenu." />
             </Grid>

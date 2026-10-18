@@ -16,7 +16,11 @@ public sealed record UpdateInfo(Version Version, string Title, string Notes, str
 public static class UpdateChecker
 {
     public const string Repository = "alexyxcfghv2/Uninstallix";
-    private const string AssetName = "Uninstallix-Setup.exe";
+    private const string SetupAssetName = "Uninstallix-Setup.exe";
+    private const string PortableAssetName = "Uninstallix-Portable.exe";
+
+    /// <summary>En mode portable on télécharge l'exe portable (remplacé sur place), sinon l'installateur.</summary>
+    private static string AssetName => PortableMode.IsActive ? PortableAssetName : SetupAssetName;
 
     private static readonly HttpClient Http = CreateClient();
 
@@ -61,7 +65,7 @@ public static class UpdateChecker
                 sha,
                 root.GetProperty("html_url").GetString() ?? $"https://github.com/{Repository}/releases");
         }
-        return null; // version publiée sans installateur : on ignore
+        return null; // version publiée sans le fichier attendu : on ignore
     }
 
     /// <summary>
@@ -77,10 +81,10 @@ public static class UpdateChecker
         return (L.IsEnglish ? body[..index] : body[(index + marker.Length)..]).Trim();
     }
 
-    /// <summary>Télécharge l'installateur (vérifié par SHA-256 quand GitHub le fournit) et renvoie son chemin.</summary>
+    /// <summary>Télécharge l'installateur ou l'exe portable (vérifié par SHA-256 quand GitHub le fournit) et renvoie son chemin.</summary>
     public static async Task<string> DownloadAsync(UpdateInfo update, IProgress<double> progress, CancellationToken cancel = default)
     {
-        var target = Path.Combine(Path.GetTempPath(), $"Uninstallix-Setup-{update.Version}.exe");
+        var target = Path.Combine(Path.GetTempPath(), PortableMode.IsActive ? $"Uninstallix-Portable-{update.Version}.exe" : $"Uninstallix-Setup-{update.Version}.exe");
         using (var response = await Http.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancel))
         {
             response.EnsureSuccessStatusCode();
@@ -113,7 +117,15 @@ public static class UpdateChecker
         return target;
     }
 
-    /// <summary>Lance l'installateur téléchargé (il ferme Uninstallix et le met à jour).</summary>
-    public static void RunInstaller(string path) =>
-        Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+    /// <summary>
+    /// Applique la mise à jour téléchargée : lance l'installateur (il ferme Uninstallix et le met à jour),
+    /// ou, en mode portable, remplace l'exe sur place et lance la nouvelle version. L'appelant ferme ensuite l'appli.
+    /// </summary>
+    public static void RunInstaller(string path)
+    {
+        if (PortableMode.IsActive)
+            PortableMode.ReplaceAndRestart(path);
+        else
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+    }
 }

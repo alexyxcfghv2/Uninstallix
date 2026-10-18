@@ -4,7 +4,7 @@ using Desinstalleur.App.Services;
 
 namespace Desinstalleur.App.Views;
 
-/// <summary>Fenêtre principale : menu latéral et pages (Logiciels, Nettoyage, Réglages).</summary>
+/// <summary>Fenêtre principale : menu latéral et pages (Logiciels, Nettoyage, Restes oubliés, Démarrage…).</summary>
 public partial class MainWindow : Window
 {
     public MainWindow()
@@ -57,6 +57,8 @@ public partial class MainWindow : Window
     }
 
     private CleanupView? _cleanupPage;
+    private OrphansView? _orphansPage;
+    private StartupView? _startupPage;
     private DiskView? _diskPage;
     private HistoryView? _historyPage;
     private SettingsView? _settingsPage;
@@ -70,6 +72,10 @@ public partial class MainWindow : Window
         UIElement page;
         if (sender == NavCleanup)
             page = _cleanupPage ??= AddPage(new CleanupView());
+        else if (sender == NavOrphans)
+            page = _orphansPage ??= AddPage(new OrphansView());
+        else if (sender == NavStartup)
+            page = _startupPage ??= AddPage(new StartupView());
         else if (sender == NavDisk)
             page = _diskPage ??= AddPage(new DiskView());
         else if (sender == NavHistory)
@@ -86,6 +92,22 @@ public partial class MainWindow : Window
 
         if (page is CleanupView cleanup)
             cleanup.AnalyzeIfNeeded();
+    }
+
+    /// <summary>Ouvre une page par son nom : « programs », « cleanup », « orphans », « startup », « disk », « history », « settings ».</summary>
+    public void Navigate(string page)
+    {
+        var button = page.ToLowerInvariant() switch
+        {
+            "cleanup" => NavCleanup,
+            "orphans" => NavOrphans,
+            "startup" => NavStartup,
+            "disk" => NavDisk,
+            "history" => NavHistory,
+            "settings" => NavSettings,
+            _ => NavPrograms,
+        };
+        button.IsChecked = true;
     }
 
     private T AddPage<T>(T page) where T : UIElement

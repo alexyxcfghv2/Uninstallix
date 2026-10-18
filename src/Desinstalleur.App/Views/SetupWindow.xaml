@@ -102,6 +102,14 @@
             </StackPanel>
 
             <!-- Boutons -->
+            <Button x:Name="PortableButton" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Style="{StaticResource GhostButton}" Padding="4,6" FontSize="12" Click="Portable_Click"
+                    ToolTip="Lance Uninstallix tout de suite, sans rien installer. Vos réglages seront gardés dans un dossier « Uninstallix-Data » à côté de ce fichier.">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xE8A7;" Style="{StaticResource IconText}" FontSize="12" Margin="0,0,6,0" />
+                    <TextBlock Text="Utiliser sans installer (mode portable)" />
+                </StackPanel>
+            </Button>
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="CancelButton" Content="Annuler" Style="{StaticResource GhostButton}" Margin="0,0,10,0" Click="Cancel_Click" />
                 <Button x:Name="InstallButton" Style="{StaticResource AccentButton}" Click="Install_Click" MinWidth="130">

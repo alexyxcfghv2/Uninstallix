@@ -1,7 +1,8 @@
 # Publishes a new version automatically.
 # On every push to "main", GitHub reads the project's <Version>. If that version is not published yet,
-# it builds Uninstallix on Windows, runs the tests, produces Uninstallix-Setup.exe
-# and creates the vX.Y.Z release that the app detects by itself.
+# it builds Uninstallix on Windows, runs the tests, produces Uninstallix-Setup.exe (installer) and
+# Uninstallix-Portable.exe (the same exe, runs without installing) and creates the vX.Y.Z release
+# that the app detects by itself.
 name: Release
 
 on:
@@ -48,7 +49,7 @@ jobs:
         if: steps.version.outputs.publish == 'true'
         run: dotnet test tests/Desinstalleur.Core.Tests -c Release
 
-      - name: Build Uninstallix-Setup.exe
+      - name: Build Uninstallix-Setup.exe and Uninstallix-Portable.exe
         if: steps.version.outputs.publish == 'true'
         shell: pwsh
         run: |
@@ -58,6 +59,8 @@ jobs:
             -o setup-build
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Copy-Item setup-build/Uninstallix.exe Uninstallix-Setup.exe
+          # Same exe: its file name ("Portable") switches it to portable mode.
+          Copy-Item setup-build/Uninstallix.exe Uninstallix-Portable.exe
 
       - name: Create GitHub release
         if: steps.version.outputs.publish == 'true'
@@ -72,4 +75,4 @@ jobs:
             Set-Content -Path notes.md -Value "New version of Uninstallix." -Encoding utf8
             $notes = "notes.md"
           }
-          gh release create $env:TAG Uninstallix-Setup.exe --target $env:GITHUB_SHA --title "Uninstallix $env:VERSION" --notes-file $notes
+          gh release create $env:TAG Uninstallix-Setup.exe Uninstallix-Portable.exe --target $env:GITHUB_SHA --title "Uninstallix $env:VERSION" --notes-file $notes

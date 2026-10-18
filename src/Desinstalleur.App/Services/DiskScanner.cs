@@ -37,7 +37,7 @@ public sealed class DiskNode
 /// </summary>
 public sealed class DiskScanner
 {
-    private const long KeepFolderBytes = 1L << 20;      // dossiers détaillés à partir de 1 Mo
+    public const long KeepFolderBytes = 1L << 20;       // dossiers détaillés à partir de 1 Mo
     private const long KeepFileBytes = 25L << 20;       // fichiers listés à partir de 25 Mo
 
     private long _files;
@@ -177,6 +177,26 @@ public sealed class DiskScanner
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             return 0;
+        }
+    }
+
+    /// <summary>Tous les dossiers détaillés sous <paramref name="root"/> (sans la racine elle-même).</summary>
+    public static IEnumerable<DiskNode> FoldersUnder(DiskNode root)
+    {
+        var pending = new Stack<DiskNode>();
+        pending.Push(root);
+        while (pending.Count > 0)
+        {
+            var folder = pending.Pop();
+            if (folder.Children is null)
+                continue;
+            foreach (var child in folder.Children)
+            {
+                if (!child.IsFolder || !child.IsReal)
+                    continue;
+                yield return child;
+                pending.Push(child);
+            }
         }
     }
 

@@ -61,7 +61,7 @@
                 <Button x:Name="InstallButton" Style="{StaticResource AccentButton}" Click="Install_Click">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="&#xE896;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" />
-                        <TextBlock Text="Installer la mise à jour" />
+                        <TextBlock x:Name="InstallButtonText" Text="Installer la mise à jour" />
                     </StackPanel>
                 </Button>
             </StackPanel>

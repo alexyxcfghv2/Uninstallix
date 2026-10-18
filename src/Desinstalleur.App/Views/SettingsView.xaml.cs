@@ -26,8 +26,13 @@ public partial class SettingsView : UserControl
         };
 
         UpdateStatusText.Text = $"Uninstallix {SelfInstaller.Version}";
+        if (PortableMode.IsActive)
+            UpdateStatusTitle.Text = L.T("Version portable");
+
+        LoadReminder();
 
         AboutText.Text = L.F("Version {0}.{1}.{2}  ·  Désinstalleur et nettoyeur pour Windows.", version?.Major, version?.Minor, version?.Build) + "\n" +
+                         (PortableMode.IsActive ? L.T("Mode portable : Uninstallix n'est pas installé sur ce PC.") + "\n" : string.Empty) +
                          L.F("Journal, réglages et sauvegardes : {0}", Journal.Folder) + "\n" +
                          L.T("© 2026 alexy. Tous droits réservés. Logiciel propriétaire : copie, modification et redistribution interdites sans autorisation.");
     }
@@ -58,6 +63,105 @@ public partial class SettingsView : UserControl
         {
             Journal.Write("Redémarrage impossible : " + ex.Message);
         }
+    }
+
+    // ----- Rappel de nettoyage -----
+
+    private bool _loadingReminder;
+
+    private void LoadReminder()
+    {
+        _loadingReminder = true;
+        var settings = AppSettings.Current;
+        ReminderToggle.IsChecked = settings.CleanupReminder;
+        (settings.ReminderFrequency == CleanupReminder.Monthly ? ReminderMonthly : ReminderWeekly).IsChecked = true;
+        (settings.ReminderThresholdMb switch { <= 500 => Threshold500, >= 5120 => Threshold5G, _ => Threshold1G }).IsChecked = true;
+        _loadingReminder = false;
+        RefreshReminderRows();
+    }
+
+    private void RefreshReminderRows()
+    {
+        var on = AppSettings.Current.CleanupReminder;
+        ReminderFrequencyRow.IsEnabled = on;
+        ReminderThresholdRow.IsEnabled = on;
+        ReminderFrequencyRow.Opacity = on ? 1 : 0.5;
+        ReminderThresholdRow.Opacity = on ? 1 : 0.5;
+    }
+
+    private void ShowReminderStatus(string text)
+    {
+        ReminderStatusText.Text = text;
+        ReminderStatusText.Visibility = Visibility.Visible;
+        Anim.FadeSlideIn(ReminderStatusText, 6);
+    }
+
+    private async void Reminder_Toggled(object sender, RoutedEventArgs e)
+    {
+        var on = ReminderToggle.IsChecked == true;
+        AppSettings.Current.CleanupReminder = on;
+        AppSettings.Current.Save();
+        RefreshReminderRows();
+        ReminderToggle.IsEnabled = false;
+        try
+        {
+            if (on)
+            {
+                var error = await Task.Run(() => CleanupReminder.Register());
+                if (error is null)
+                {
+                    ShowReminderStatus(ReminderSummary());
+                }
+                else
+                {
+                    AppSettings.Current.CleanupReminder = false;
+                    AppSettings.Current.Save();
+                    ReminderToggle.IsChecked = false;
+                    RefreshReminderRows();
+                    ShowReminderStatus(L.F("Impossible de programmer le rappel : {0}", error));
+                }
+            }
+            else
+            {
+                await Task.Run(CleanupReminder.Unregister);
+                ShowReminderStatus(L.T("Rappel désactivé : la tâche planifiée a été supprimée."));
+            }
+        }
+        finally
+        {
+            ReminderToggle.IsEnabled = true;
+        }
+    }
+
+    private async void ReminderFrequency_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingReminder || sender is not RadioButton { Tag: string frequency } || frequency == AppSettings.Current.ReminderFrequency)
+            return;
+        AppSettings.Current.ReminderFrequency = frequency;
+        AppSettings.Current.Save();
+        if (!AppSettings.Current.CleanupReminder)
+            return;
+        var error = await Task.Run(() => CleanupReminder.Register());
+        ShowReminderStatus(error is null ? ReminderSummary() : L.F("Impossible de programmer le rappel : {0}", error));
+    }
+
+    private void ReminderThreshold_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingReminder || sender is not RadioButton { Tag: string tag } || !int.TryParse(tag, out var mb))
+            return;
+        // Le seuil est lu au moment du rappel : pas besoin de recréer la tâche.
+        AppSettings.Current.ReminderThresholdMb = mb;
+        AppSettings.Current.Save();
+        if (AppSettings.Current.CleanupReminder)
+            ShowReminderStatus(ReminderSummary());
+    }
+
+    private static string ReminderSummary()
+    {
+        var threshold = Desinstalleur.Core.ValueParsers.FormatSize(AppSettings.Current.ReminderThresholdMb * 1024L * 1024L);
+        return AppSettings.Current.ReminderFrequency == CleanupReminder.Monthly
+            ? L.F("✓ Rappel programmé : chaque mois, si au moins {0} peuvent être libérés.", threshold)
+            : L.F("✓ Rappel programmé : chaque semaine, si au moins {0} peuvent être libérés.", threshold);
     }
 
     // ----- Favoris protégés -----

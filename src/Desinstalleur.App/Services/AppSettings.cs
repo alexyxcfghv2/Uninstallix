@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace Desinstalleur.App.Services;
 
-/// <summary>Réglages de l'utilisateur, enregistrés dans %LocalAppData%\Uninstallix\reglages.json.</summary>
+/// <summary>Réglages de l'utilisateur, enregistrés dans reglages.json du dossier de données (Journal.Folder).</summary>
 public sealed class AppSettings
 {
     private static readonly string FilePath = Path.Combine(Journal.Folder, "reglages.json");
@@ -36,6 +36,18 @@ public sealed class AppSettings
 
     /// <summary>Cherche une nouvelle version sur GitHub au démarrage.</summary>
     public bool CheckUpdatesOnStartup { get; set; } = true;
+
+    /// <summary>Rappel de nettoyage : une tâche planifiée prévient quand un nettoyage libérerait assez de place.</summary>
+    public bool CleanupReminder { get; set; }
+
+    /// <summary>Fréquence du rappel : « semaine » ou « mois ».</summary>
+    public string ReminderFrequency { get; set; } = "semaine";
+
+    /// <summary>Seuil du rappel, en Mo : on ne prévient que si au moins cette place peut être libérée.</summary>
+    public int ReminderThresholdMb { get; set; } = 1024;
+
+    /// <summary>Commande et fréquence de la dernière tâche planifiée créée (pour la recréer si l'exe a bougé).</summary>
+    public string? ReminderTaskSignature { get; set; }
 
     /// <summary>Dossiers jamais proposés au nettoyage (caches et restes).</summary>
     public List<string> ProtectedFolders { get; set; } = new();

@@ -24,6 +24,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Fichiers temporaires",
+                Purpose = "Fichiers de travail créés par Windows, les installateurs et les programmes. Une fois la tâche terminée, ils ne servent généralement plus.",
+                Consequence = "Rien à refaire : les programmes recréent ces fichiers s'ils en ont besoin. Les fichiers encore ouverts par un programme sont ignorés.",
+                Impact = CacheImpact.None,
                 Description = "Fichiers laissés par Windows et les installations. Les fichiers de moins de 24 h sont gardés (réglable).",
                 Glyph = "",
                 Folders = new[] { Path.GetTempPath(), Path.Combine(WindowsDir, "Temp") },
@@ -33,6 +36,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "FiveM",
+                Purpose = "Ressources téléchargées depuis les serveurs (véhicules, cartes, vêtements, scripts), ainsi que les journaux et rapports de plantage de FiveM.",
+                Consequence = "Les ressources de chaque serveur seront téléchargées de nouveau à la prochaine connexion : la première arrivée sur un serveur sera plus longue. Les fichiers du jeu (dossier « game »), votre compte et vos réglages ne sont pas touchés.",
+                Impact = CacheImpact.Notice,
                 Description = "Cache des serveurs, journaux et rapports de plantage. Les fichiers du jeu ne sont pas touchés.",
                 Glyph = "",
                 Folders = new[]
@@ -51,6 +57,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Discord",
+                Purpose = "Copies locales des images, avatars, émojis et pièces jointes déjà affichés, et code de l'application préparé pour démarrer plus vite.",
+                Consequence = "Discord retélécharge les images et émojis au fil de la navigation et peut démarrer un peu plus lentement la première fois. Vous restez connecté ; messages, serveurs et réglages ne sont pas touchés.",
+                Impact = CacheImpact.Low,
                 Description = "Images et données mises en cache. Vos messages et votre compte ne sont pas touchés.",
                 Glyph = "",
                 Folders = new[] { "Cache", "Code Cache", "GPUCache" }.Select(f => Path.Combine(Roaming, "discord", f)).ToArray(),
@@ -61,6 +70,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Google Chrome",
+                Purpose = "Copies des pages, images et scripts des sites déjà visités (dossiers Cache, Code Cache et GPUCache de chaque profil), pour les afficher plus vite.",
+                Consequence = "Les sites seront un peu plus lents à charger la première fois, le temps de retélécharger leurs fichiers. Les cookies ne sont pas supprimés : vous restez connecté aux sites. Historique, mots de passe, favoris et onglets sont conservés.",
+                Impact = CacheImpact.Low,
                 Description = "Cache des pages web. Historique, mots de passe et onglets sont conservés.",
                 Glyph = "",
                 Folders = BrowserCaches(Path.Combine(Local, "Google", "Chrome", "User Data")),
@@ -70,6 +82,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Microsoft Edge",
+                Purpose = "Copies des pages, images et scripts des sites déjà visités (dossiers Cache, Code Cache et GPUCache de chaque profil), pour les afficher plus vite.",
+                Consequence = "Les sites seront un peu plus lents à charger la première fois, le temps de retélécharger leurs fichiers. Les cookies ne sont pas supprimés : vous restez connecté aux sites. Historique, mots de passe, favoris et onglets sont conservés.",
+                Impact = CacheImpact.Low,
                 Description = "Cache des pages web. Historique, mots de passe et onglets sont conservés.",
                 Glyph = "",
                 Folders = BrowserCaches(Path.Combine(Local, "Microsoft", "Edge", "User Data")),
@@ -79,6 +94,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Steam",
+                Purpose = "Cache du navigateur intégré de Steam : pages du magasin, de la communauté et de la bibliothèque déjà affichées.",
+                Consequence = "Le magasin et la communauté se rechargeront un peu plus lentement la première fois. Vos jeux, vos sauvegardes et les téléchargements en cours ne sont pas touchés.",
+                Impact = CacheImpact.Low,
                 Description = "Cache du navigateur intégré de Steam. Vos jeux ne sont pas touchés.",
                 Glyph = "",
                 Folders = new[] { Path.Combine(Local, "Steam", "htmlcache") },
@@ -88,6 +106,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Roblox",
+                Purpose = "Journaux d'activité écrits par Roblox et Roblox Studio à chaque session. Ils ne servent qu'à diagnostiquer un problème.",
+                Consequence = "Aucun effet sur le jeu : votre compte, vos réglages et vos créations ne sont pas touchés. Les journaux des sessions passées ne seront plus disponibles pour un dépannage.",
+                Impact = CacheImpact.None,
                 Description = "Journaux de Roblox et de Roblox Studio.",
                 Glyph = "",
                 Folders = new[] { Path.Combine(Local, "Roblox", "logs") },
@@ -97,6 +118,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Cache des shaders",
+                Purpose = "Shaders déjà compilés par les pilotes graphiques NVIDIA et AMD et par DirectX, pour ne pas les recalculer à chaque lancement de jeu.",
+                Consequence = "Ils sont reconstruits automatiquement : les premiers lancements de vos jeux peuvent être plus longs ou saccader brièvement, le temps de les recompiler. Utile après une mise à jour du pilote graphique ou en cas de bugs d'affichage.",
+                Impact = CacheImpact.Notice,
                 Description = "Shaders NVIDIA, AMD et DirectX. Ils seront recréés : les jeux peuvent saccader un peu au premier lancement.",
                 Glyph = "",
                 Folders = new[]
@@ -111,6 +135,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Rapports d'erreurs",
+                Purpose = "Rapports de plantage et vidages mémoire gardés par Windows pour un éventuel envoi à Microsoft ou aux développeurs.",
+                Consequence = "Aucun effet sur le fonctionnement du PC. Les plantages passés ne pourront simplement plus être analysés ni envoyés.",
+                Impact = CacheImpact.None,
                 Description = "Rapports de plantage et vidages mémoire conservés par Windows.",
                 Glyph = "",
                 Folders = new[]
@@ -124,6 +151,9 @@ public static class CacheCleaner
             new()
             {
                 Name = "Corbeille",
+                Purpose = "Fichiers que vous avez supprimés, gardés au cas où vous voudriez les restaurer.",
+                Consequence = "Ces fichiers seront supprimés définitivement : ils ne pourront plus être restaurés depuis la Corbeille.",
+                Impact = CacheImpact.Permanent,
                 Description = "Vide définitivement la Corbeille de tous les lecteurs.",
                 Glyph = "",
                 IsRecycleBin = true,

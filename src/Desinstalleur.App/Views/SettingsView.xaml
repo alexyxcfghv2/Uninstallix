@@ -175,6 +175,64 @@
                 </Border>
             </Border>
 
+            <!-- Rappel de nettoyage -->
+            <TextBlock Text="RAPPEL DE NETTOYAGE" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,22">
+                <StackPanel>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <CheckBox x:Name="ReminderToggle" DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" VerticalAlignment="Center"
+                                      Click="Reminder_Toggled" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Me prévenir quand un nettoyage serait utile" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Une tâche planifiée de Windows vérifie la place occupée par les caches. Si elle dépasse le seuil, une petite fenêtre vous le propose. Rien n'est jamais nettoyé sans vous."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                <TextBlock x:Name="ReminderStatusText" Style="{StaticResource SecondaryText}" FontSize="12" TextWrapping="Wrap"
+                                           Margin="0,6,0,0" Visibility="Collapsed" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border x:Name="ReminderFrequencyRow" Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" VerticalAlignment="Center" Background="{StaticResource InputBackground}"
+                                    BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="11" Padding="4">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="ReminderWeekly" GroupName="ReminderFrequency" Style="{StaticResource SegmentButton}"
+                                                 Content="Chaque semaine" Tag="semaine" Checked="ReminderFrequency_Checked" />
+                                    <RadioButton x:Name="ReminderMonthly" GroupName="ReminderFrequency" Style="{StaticResource SegmentButton}"
+                                                 Content="Chaque mois" Tag="mois" Checked="ReminderFrequency_Checked" />
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Fréquence" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Pas de rappel si vous avez fait un nettoyage pendant cette période."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border x:Name="ReminderThresholdRow" Style="{StaticResource SettingRow}" BorderThickness="0">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" VerticalAlignment="Center" Background="{StaticResource InputBackground}"
+                                    BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="11" Padding="4">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="Threshold500" GroupName="ReminderThreshold" Style="{StaticResource SegmentButton}"
+                                                 Content="500 Mo" Tag="500" Checked="ReminderThreshold_Checked" />
+                                    <RadioButton x:Name="Threshold1G" GroupName="ReminderThreshold" Style="{StaticResource SegmentButton}"
+                                                 Content="1 Go" Tag="1024" Checked="ReminderThreshold_Checked" />
+                                    <RadioButton x:Name="Threshold5G" GroupName="ReminderThreshold" Style="{StaticResource SegmentButton}"
+                                                 Content="5 Go" Tag="5120" Checked="ReminderThreshold_Checked" />
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Seuil" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Vous n'êtes prévenu que si le nettoyage (profil actif) peut libérer au moins cette place."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
             <!-- Favoris protégés -->
             <TextBlock Text="FAVORIS PROTÉGÉS" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,22">

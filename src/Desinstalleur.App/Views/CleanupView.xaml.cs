@@ -160,6 +160,20 @@ public partial class CleanupView : UserControl
         SaveProfile();
     }
 
+    // ----- Explications -----
+
+    private void Info_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: CacheTarget target })
+            target.IsExpanded = !target.IsExpanded;
+    }
+
+    private void Details_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is true && sender is UIElement panel)
+            Anim.FadeSlideIn(panel, 6, 220);
+    }
+
     private async void Analyze_Click(object sender, RoutedEventArgs e) => await AnalyzeAsync();
 
     private async void Clean_Click(object sender, RoutedEventArgs e)

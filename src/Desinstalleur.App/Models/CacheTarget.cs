@@ -3,6 +3,22 @@ using Desinstalleur.Core;
 
 namespace Desinstalleur.App.Models;
 
+/// <summary>Conséquence du nettoyage d'un cache, affichée sous forme de pastille.</summary>
+public enum CacheImpact
+{
+    /// <summary>Rien à refaire ni à retélécharger.</summary>
+    None,
+
+    /// <summary>Un peu plus lent la première fois, le temps de recréer le cache.</summary>
+    Low,
+
+    /// <summary>Effet visible à connaître (téléchargements, saccades…).</summary>
+    Notice,
+
+    /// <summary>Suppression définitive, sans retour possible.</summary>
+    Permanent,
+}
+
 /// <summary>Un cache que l'on peut vider (FiveM, Discord, navigateur, Corbeille…).</summary>
 public sealed class CacheTarget : ObservableObject
 {
@@ -11,6 +27,7 @@ public sealed class CacheTarget : ObservableObject
     private string? _statusText;
     private bool? _succeeded;
     private bool _isBusy;
+    private bool _isExpanded;
 
     public required string Name { get; init; }
     public required string Description { get; init; }
@@ -18,6 +35,46 @@ public sealed class CacheTarget : ObservableObject
     /// <summary>Nom affiché (Name reste l'identifiant enregistré dans les profils).</summary>
     public string DisplayName => L.T(Name);
     public string DisplayDescription => L.T(Description);
+
+    /// <summary>À quoi sert ce cache (texte français, traduit à l'affichage).</summary>
+    public string Purpose { get; init; } = string.Empty;
+
+    /// <summary>Ce qui se passe après le nettoyage (texte français, traduit à l'affichage).</summary>
+    public string Consequence { get; init; } = string.Empty;
+
+    public CacheImpact Impact { get; init; } = CacheImpact.Low;
+
+    public string DisplayPurpose => L.T(Purpose);
+    public string DisplayConsequence => L.T(Consequence);
+
+    public string ImpactText => Impact switch
+    {
+        CacheImpact.None => L.T("Sans impact"),
+        CacheImpact.Notice => L.T("À savoir"),
+        CacheImpact.Permanent => L.T("Irréversible"),
+        _ => L.T("Impact faible"),
+    };
+
+    public string ImpactToolTip => Impact switch
+    {
+        CacheImpact.None => L.T("Rien à refaire ni à télécharger après le nettoyage."),
+        CacheImpact.Notice => L.T("Le nettoyage a un effet visible : lisez « Après le nettoyage »."),
+        CacheImpact.Permanent => L.T("Les fichiers supprimés ne pourront pas être récupérés."),
+        _ => L.T("Le cache se recrée tout seul : seul le premier chargement est un peu plus lent."),
+    };
+
+    /// <summary>Explication dépliée sous la ligne dans la page Nettoyage.</summary>
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (Set(ref _isExpanded, value))
+                OnPropertyChanged(nameof(InfoToolTip));
+        }
+    }
+
+    public string InfoToolTip => IsExpanded ? L.T("Masquer l'explication") : L.T("À quoi sert ce cache ? Que se passe-t-il après le nettoyage ?");
 
     /// <summary>Glyphe Segoe Fluent Icons.</summary>
     public required string Glyph { get; init; }

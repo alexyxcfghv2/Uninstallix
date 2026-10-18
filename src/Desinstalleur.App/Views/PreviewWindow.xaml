@@ -87,6 +87,17 @@
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="15" />
                                             <TextBlock Text="{Binding SummaryText}" Style="{StaticResource SecondaryText}" FontSize="12" TextWrapping="Wrap" />
+                                            <!-- Conséquence du nettoyage de ce cache -->
+                                            <Grid Margin="0,5,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock x:Name="ConsequenceIcon" Text="&#xE946;" Style="{StaticResource IconText}" FontSize="12"
+                                                           Foreground="#5AB4FF" VerticalAlignment="Top" Margin="0,2,7,0" />
+                                                <TextBlock x:Name="ConsequenceText" Grid.Column="1" Text="{Binding Target.DisplayConsequence}" FontSize="12"
+                                                           TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" />
+                                            </Grid>
                                         </StackPanel>
                                         <TextBlock Grid.Column="2" Text="{Binding TotalText}" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
                                     </Grid>
@@ -122,6 +133,17 @@
                                     </ItemsControl>
                                 </StackPanel>
                             </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Target.Impact}" Value="Notice">
+                                    <Setter TargetName="ConsequenceIcon" Property="Text" Value="&#xE7BA;" />
+                                    <Setter TargetName="ConsequenceIcon" Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Target.Impact}" Value="Permanent">
+                                    <Setter TargetName="ConsequenceIcon" Property="Text" Value="&#xE7BA;" />
+                                    <Setter TargetName="ConsequenceIcon" Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                    <Setter TargetName="ConsequenceText" Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

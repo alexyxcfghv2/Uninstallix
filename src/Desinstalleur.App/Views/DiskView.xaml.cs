@@ -19,6 +19,8 @@ public partial class DiskView : UserControl
     private CancellationTokenSource? _cancel;
     private DiskScanner? _scanner;
     private DiskNode? _current;
+    private DiskComparison? _comparison;
+    private bool _showGrowth;
 
     public DiskView()
     {
@@ -62,7 +64,12 @@ public partial class DiskView : UserControl
 
         _trail.Clear();
         _current = null;
+        _comparison = null;
         RowsList.ItemsSource = null;
+        GrowthList.ItemsSource = null;
+        CompareBar.Visibility = Visibility.Collapsed;
+        FirstScanHint.Visibility = Visibility.Collapsed;
+        SetGrowthMode(false);
         HintText.Visibility = Visibility.Collapsed;
         UpButton.IsEnabled = false;
         OpenCurrentButton.IsEnabled = false;
@@ -77,10 +84,13 @@ public partial class DiskView : UserControl
         try
         {
             var result = await Task.Run(() => scanner.Scan(root, token), token);
+            var seconds = (DateTime.Now - started).TotalSeconds;
+            // Analyse complète : comparée à la précédente du même emplacement, puis gardée pour la suivante.
+            var comparison = await Task.Run(() => DiskSnapshots.CompareAndSave(result));
             if (_scanner != scanner)
                 return;
-            var seconds = (DateTime.Now - started).TotalSeconds;
             Show(result);
+            ShowComparison(comparison);
             StatusText.Text += L.F("  ·  analysé en {0:0} s", seconds);
         }
         catch (Exception ex) when (ex is OperationCanceledException ||
@@ -123,6 +133,76 @@ public partial class DiskView : UserControl
         Anim.FadeSlideIn(RowsList, 10, 280);
     }
 
+    private void ShowComparison(DiskComparison? comparison)
+    {
+        _comparison = comparison;
+        FirstScanHint.Visibility = comparison is null ? Visibility.Visible : Visibility.Collapsed;
+        CompareBar.Visibility = comparison is null ? Visibility.Collapsed : Visibility.Visible;
+        if (comparison is null)
+            return;
+
+        CompareText.Text = comparison.SummaryText;
+        var unchanged = Math.Abs(comparison.Delta) < DiskSnapshots.UnchangedBytes;
+        var brush = unchanged ? "TextPrimary" : comparison.Delta > 0 ? "DangerBrush" : "SuccessBrush";
+        CompareText.Foreground = (System.Windows.Media.Brush)FindResource(brush);
+        CompareIcon.Text = unchanged ? "\uE81C" : comparison.Delta > 0 ? "\uE70E" : "\uE70D";
+        CompareIcon.Foreground = unchanged ? (System.Windows.Media.Brush)FindResource("TextSecondary") : CompareText.Foreground;
+        GrowthList.ItemsSource = comparison.Grown;
+        GrowthEmptyText.Text = L.F("Aucun dossier n'a grossi de plus de {0} depuis l'analyse précédente.",
+            ValueParsers.FormatSize(DiskSnapshots.MinGrowthBytes));
+    }
+
+    private void ViewMode_Checked(object sender, RoutedEventArgs e)
+    {
+        if (GrowthList is null)
+            return;
+        var growth = GrownButton.IsChecked == true;
+        if (growth == _showGrowth)
+            return;
+        _showGrowth = growth;
+        ApplyViewMode();
+    }
+
+    private void SetGrowthMode(bool growth)
+    {
+        _showGrowth = growth;
+        if (growth)
+            GrownButton.IsChecked = true;
+        else
+            AllFoldersButton.IsChecked = true;
+        ApplyViewMode();
+    }
+
+    private void ApplyViewMode()
+    {
+        var growth = _showGrowth && _comparison is not null;
+        RowsList.Visibility = growth ? Visibility.Collapsed : Visibility.Visible;
+        GrowthList.Visibility = growth ? Visibility.Visible : Visibility.Collapsed;
+        GrowthEmptyText.Visibility = growth && _comparison!.Grown.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        UpButton.IsEnabled = !growth && _trail.Count > 0;
+        if (growth)
+        {
+            var count = _comparison!.Grown.Count;
+            StatusText.Text = count switch
+            {
+                0 => L.T("Aucun dossier n'a beaucoup grossi."),
+                1 => L.T("1 dossier a grossi."),
+                _ => L.F("{0:N0} dossiers ont grossi.", count),
+            };
+            Anim.FadeSlideIn(GrowthList, 10, 280);
+        }
+        else if (_current is not null)
+        {
+            Show(_current);
+        }
+    }
+
+    private void OpenGrowthLocation_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: GrowthRow row })
+            OpenInExplorer(Directory.Exists(row.FullPath) ? $"/select,\"{row.FullPath}\"" : $"\"{Path.GetDirectoryName(row.FullPath)}\"");
+    }
+
     private void ShowFreeSpace(string root)
     {
         try
@@ -139,7 +219,7 @@ public partial class DiskView : UserControl
 
     private void Rows_DoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (RowsList.SelectedItem is DiskNode { CanOpen: true } node && _current is not null)
+        if (!_showGrowth && RowsList.SelectedItem is DiskNode { CanOpen: true } node && _current is not null)
         {
             _trail.Push(_current);
             Show(node);
@@ -148,7 +228,7 @@ public partial class DiskView : UserControl
 
     private void Up_Click(object sender, RoutedEventArgs e)
     {
-        if (_trail.Count > 0)
+        if (!_showGrowth && _trail.Count > 0)
             Show(_trail.Pop());
     }
 

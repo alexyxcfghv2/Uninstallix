@@ -9,7 +9,7 @@
     <AssemblyName>Uninstallix</AssemblyName>
     <RootNamespace>Desinstalleur.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>0.7.0</Version>
+    <Version>0.8.0</Version>
     <TieredPGO>true</TieredPGO>
     <!-- Mémoire : ramasse-miettes économe (pas de thread de fond, tas compacté plus souvent). -->
     <ServerGarbageCollection>false</ServerGarbageCollection>

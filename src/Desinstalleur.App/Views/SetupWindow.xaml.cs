@@ -66,6 +66,7 @@ public partial class SetupWindow : Window
         Anim.FadeSlideIn(ProgressStep);
         InstallButton.IsEnabled = false;
         CancelButton.IsEnabled = false;
+        PortableButton.Visibility = Visibility.Collapsed;
         _installing = true;
 
         try
@@ -83,6 +84,7 @@ public partial class SetupWindow : Window
             Anim.FadeSlideIn(OptionsStep);
             InstallButton.IsEnabled = true;
             CancelButton.IsEnabled = true;
+            PortableButton.Visibility = Visibility.Visible;
             return;
         }
         finally
@@ -138,6 +140,28 @@ public partial class SetupWindow : Window
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
+
+    /// <summary>Essai sans installation : relance ce même fichier en mode portable, rien n'est copié ni inscrit dans Windows.</summary>
+    private void Portable_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var exe = Environment.ProcessPath ?? throw new InvalidOperationException(L.T("Chemin de l'exécutable introuvable."));
+            Process.Start(new ProcessStartInfo(exe, PortableMode.Argument)
+            {
+                UseShellExecute = true,
+                WorkingDirectory = Path.GetDirectoryName(exe) ?? string.Empty,
+            });
+            Journal.Write("Lancement en mode portable depuis l'installateur : " + exe);
+            Close();
+        }
+        catch (Exception ex)
+        {
+            Journal.Write("Lancement en mode portable impossible : " + ex.Message);
+            MessageBox.Show(this, L.F("Impossible de lancer le mode portable :\n\n{0}", ex.Message), "Uninstallix",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
 
     private void Finish_Click(object sender, RoutedEventArgs e)
     {
