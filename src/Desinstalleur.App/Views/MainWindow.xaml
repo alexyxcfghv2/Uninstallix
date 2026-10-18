@@ -51,6 +51,10 @@
                                  Content="Logiciels" IsChecked="True" Checked="Nav_Checked" />
                     <RadioButton x:Name="NavCleanup" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xEA99;"
                                  Content="Nettoyage" Checked="Nav_Checked" />
+                    <RadioButton x:Name="NavOrphans" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE8B7;"
+                                 Content="Restes oubliés" Checked="Nav_Checked" />
+                    <RadioButton x:Name="NavStartup" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE7E8;"
+                                 Content="Démarrage" Checked="Nav_Checked" />
                     <RadioButton x:Name="NavDisk" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xEDA2;"
                                  Content="Espace disque" Checked="Nav_Checked" />
                     <RadioButton x:Name="NavHistory" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE81C;"

@@ -1,0 +1,12 @@
+<UserControl x:Class="Desinstalleur.App.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Foreground="{StaticResource TextPrimary}">
+
+    <Grid Margin="28,24,28,22">
+        <StackPanel>
+            <TextBlock Text="Démarrage" Style="{StaticResource TitleText}" />
+            <TextBlock Text="Les applications qui se lancent avec Windows." Style="{StaticResource SecondaryText}" Margin="1,3,0,0" />
+        </StackPanel>
+    </Grid>
+</UserControl>

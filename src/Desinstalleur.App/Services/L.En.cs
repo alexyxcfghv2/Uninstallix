@@ -451,5 +451,9 @@ public static partial class L
         yield return ("Automatique", "Automatic");
         yield return ("« Automatique » suit la langue de Windows. Le changement s'applique au prochain démarrage.", "\"Automatic\" follows the Windows language. The change applies the next time Uninstallix starts.");
         yield return ("La nouvelle langue s'appliquera au prochain démarrage d'Uninstallix. Redémarrer maintenant ?", "The new language will apply the next time Uninstallix starts. Restart now?");
+        yield return ("Restes oubliés", "Forgotten leftovers");
+        yield return ("Démarrage", "Startup");
+        yield return ("Dossiers laissés par des logiciels déjà désinstallés.", "Folders left behind by programs that are already uninstalled.");
+        yield return ("Les applications qui se lancent avec Windows.", "Apps that start with Windows.");
     }
 }
