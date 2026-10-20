@@ -598,5 +598,8 @@ public static partial class L
         yield return ("Rien n'a été supprimé : vous voyez d'abord ce qui serait nettoyé.", "Nothing has been deleted: you'll see what would be cleaned first.");
         yield return ("Ne plus me rappeler", "Don't remind me again");
         yield return ("Voir le nettoyage", "View cleanup");
+        yield return ("Cache du navigateur intégré du Rockstar Games Launcher (pages de la boutique, images, scripts, cache graphique) et journaux du launcher.", "Cache of the Rockstar Games Launcher's built-in browser (store pages, images, scripts, graphics cache) and the launcher's logs.");
+        yield return ("Le launcher retélécharge ses pages et images au prochain démarrage, qui peut être un peu plus long. Utile quand le launcher reste bloqué, affiche une page blanche ou ne se connecte pas. Vos jeux (GTA V, Red Dead…), vos sauvegardes et vos réglages ne sont pas touchés, et les cookies sont gardés : vous restez connecté.", "The launcher downloads its pages and images again the next time it starts, which can take a little longer. Useful when the launcher is stuck, shows a blank page or won't connect. Your games (GTA V, Red Dead…), saves and settings are not touched, and cookies are kept: you stay signed in.");
+        yield return ("Cache et journaux du launcher. Vos jeux, sauvegardes et votre compte ne sont pas touchés.", "Launcher cache and logs. Your games, saves and account are not touched.");
     }
 }

@@ -31,7 +31,7 @@ Nothing else to install: everything is included. Uninstallix tells you by itself
 - **Programs**: list with size and date, search, sorting, uninstall one or several programs in a row,
   then scan for leftovers (files, folders, registry). Nothing is deleted without your approval, and essential
   Windows components are protected.
-- **Cleanup**: caches of FiveM, Discord, Chrome, Edge, Steam, Roblox, shaders, temporary files and the Recycle Bin,
+- **Cleanup**: caches of FiveM, Discord, Chrome, Edge, Steam, Roblox, Rockstar Games Launcher, shaders, temporary files and the Recycle Bin,
   each one explained, with a preview of what will be deleted and profiles (Gaming, Browsers, Custom). Frees RAM and
   flushes the DNS cache.
 - **Forgotten leftovers**: find folders left behind by programs you already uninstalled, and review them before cleaning.

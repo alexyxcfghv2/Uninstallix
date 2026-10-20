@@ -117,6 +117,24 @@ public static class CacheCleaner
             },
             new()
             {
+                Name = "Rockstar Games Launcher",
+                Purpose = "Cache du navigateur intégré du Rockstar Games Launcher (pages de la boutique, images, scripts, cache graphique) et journaux du launcher.",
+                Consequence = "Le launcher retélécharge ses pages et images au prochain démarrage, qui peut être un peu plus long. Utile quand le launcher reste bloqué, affiche une page blanche ou ne se connecte pas. Vos jeux (GTA V, Red Dead…), vos sauvegardes et vos réglages ne sont pas touchés, et les cookies sont gardés : vous restez connecté.",
+                Impact = CacheImpact.Low,
+                Description = "Cache et journaux du launcher. Vos jeux, sauvegardes et votre compte ne sont pas touchés.",
+                Glyph = "",
+                Folders = new[]
+                {
+                    Path.Combine(Local, "Rockstar Games", "Launcher", "cache"),
+                    Path.Combine(Local, "Rockstar Games", "Launcher", "logs"),
+                },
+                // Données de connexion du navigateur intégré : on les garde pour ne pas déconnecter le compte.
+                KeepSubfolders = new[] { "Cookies", "Cookies-journal", "Network", "Local Storage", "Session Storage", "IndexedDB" },
+                Processes = new[] { "Launcher@Rockstar Games", "LauncherPatcher@Rockstar Games", "SocialClubHelper" },
+                AppName = "Rockstar Games Launcher",
+            },
+            new()
+            {
                 Name = "Cache des shaders",
                 Purpose = "Shaders déjà compilés par les pilotes graphiques NVIDIA et AMD et par DirectX, pour ne pas les recalculer à chaque lancement de jeu.",
                 Consequence = "Ils sont reconstruits automatiquement : les premiers lancements de vos jeux peuvent être plus longs ou saccader brièvement, le temps de les recompiler. Utile après une mise à jour du pilote graphique ou en cas de bugs d'affichage.",
@@ -204,11 +222,45 @@ public static class CacheCleaner
 
     private static bool IsRunning(string processName)
     {
-        var processes = Process.GetProcessesByName(processName);
-        var running = processes.Length > 0;
+        var processes = Matching(processName);
+        var running = processes.Count > 0;
         foreach (var p in processes)
             p.Dispose();
         return running;
+    }
+
+    /// <summary>
+    /// Processus correspondant à « nom » ou à « nom@morceau de chemin » : la seconde forme ne garde que les
+    /// processus dont l'exe se trouve dans un dossier contenant ce morceau (ex. « Launcher@Rockstar Games »,
+    /// pour ne pas confondre avec un autre « Launcher.exe »).
+    /// </summary>
+    private static List<Process> Matching(string spec)
+    {
+        var at = spec.IndexOf('@');
+        var name = at < 0 ? spec : spec[..at];
+        var processes = Process.GetProcessesByName(name).ToList();
+        if (at < 0)
+            return processes;
+
+        var fragment = spec[(at + 1)..];
+        var kept = new List<Process>();
+        foreach (var process in processes)
+        {
+            string? path = null;
+            try
+            {
+                path = process.MainModule?.FileName;
+            }
+            catch
+            {
+                // Accès refusé : on ne peut pas vérifier, on l'ignore.
+            }
+            if (path is not null && path.Contains(fragment, StringComparison.OrdinalIgnoreCase))
+                kept.Add(process);
+            else
+                process.Dispose();
+        }
+        return kept;
     }
 
     /// <summary>Vide le cache et renvoie le nombre d'octets libérés et de fichiers ignorés.</summary>
@@ -306,7 +358,7 @@ public static class CacheCleaner
         {
             foreach (var name in target.Processes)
             {
-                foreach (var process in Process.GetProcessesByName(name))
+                foreach (var process in Matching(name))
                 {
                     try
                     {
