@@ -59,6 +59,9 @@ public partial class MainWindow : Window
     private CleanupView? _cleanupPage;
     private OrphansView? _orphansPage;
     private StartupView? _startupPage;
+    private FilesView? _filesPage;
+    private WindowsAppsView? _windowsAppsPage;
+    private GameModeView? _gameModePage;
     private DiskView? _diskPage;
     private HistoryView? _historyPage;
     private SettingsView? _settingsPage;
@@ -76,6 +79,12 @@ public partial class MainWindow : Window
             page = _orphansPage ??= AddPage(new OrphansView());
         else if (sender == NavStartup)
             page = _startupPage ??= AddPage(new StartupView());
+        else if (sender == NavFiles)
+            page = _filesPage ??= AddPage(new FilesView());
+        else if (sender == NavWindowsApps)
+            page = _windowsAppsPage ??= AddPage(new WindowsAppsView());
+        else if (sender == NavGameMode)
+            page = _gameModePage ??= AddPage(new GameModeView());
         else if (sender == NavDisk)
             page = _diskPage ??= AddPage(new DiskView());
         else if (sender == NavHistory)
@@ -102,6 +111,9 @@ public partial class MainWindow : Window
             "cleanup" => NavCleanup,
             "orphans" => NavOrphans,
             "startup" => NavStartup,
+            "files" => NavFiles,
+            "windowsapps" => NavWindowsApps,
+            "gamemode" => NavGameMode,
             "disk" => NavDisk,
             "history" => NavHistory,
             "settings" => NavSettings,

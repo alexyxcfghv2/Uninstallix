@@ -45,7 +45,8 @@
                                VerticalAlignment="Center" Margin="10,0,0,0" />
                 </StackPanel>
 
-                <StackPanel Grid.Row="1">
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
                     <TextBlock Text="MENU" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextDisabled}" Margin="12,0,0,8" />
                     <RadioButton x:Name="NavPrograms" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE71D;"
                                  Content="Logiciels" IsChecked="True" Checked="Nav_Checked" />
@@ -55,6 +56,12 @@
                                  Content="Restes oubliés" Checked="Nav_Checked" />
                     <RadioButton x:Name="NavStartup" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE7E8;"
                                  Content="Démarrage" Checked="Nav_Checked" />
+                    <RadioButton x:Name="NavFiles" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE8A5;"
+                                 Content="Fichiers" Checked="Nav_Checked" />
+                    <RadioButton x:Name="NavWindowsApps" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE74C;"
+                                 Content="Applis Windows" Checked="Nav_Checked" />
+                    <RadioButton x:Name="NavGameMode" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE7FC;"
+                                 Content="Mode jeu" Checked="Nav_Checked" />
                     <RadioButton x:Name="NavDisk" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xEDA2;"
                                  Content="Espace disque" Checked="Nav_Checked" />
                     <RadioButton x:Name="NavHistory" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE81C;"
@@ -62,6 +69,7 @@
                     <RadioButton x:Name="NavSettings" GroupName="Nav" Style="{StaticResource NavButton}" Tag="&#xE713;"
                                  Content="Réglages" Checked="Nav_Checked" />
                 </StackPanel>
+                </ScrollViewer>
 
                 <!-- Bandeau de mise à jour (caché tant qu'aucune nouvelle version n'est trouvée) -->
                 <Button x:Name="UpdateBanner" Grid.Row="2" Style="{StaticResource AccentButton}" Margin="0,0,0,10" Padding="12,10"
