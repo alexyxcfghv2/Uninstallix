@@ -38,8 +38,30 @@
             </Border>
         </Grid>
 
-        <!-- Logiciels à fermer -->
-        <Border x:Name="RunningCard" Grid.Row="1" Background="{StaticResource WarningSoft}" CornerRadius="12" Padding="16,12"
+        <!-- Avertissements importants (Windows.old, services arrêtés…) et logiciels à fermer -->
+        <StackPanel Grid.Row="1">
+        <Border x:Name="WarningCard" Background="{StaticResource DangerSoft}" CornerRadius="12" Padding="16,12"
+                Margin="0,0,0,14" Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xE7BA;" Style="{StaticResource IconText}" FontSize="18" Foreground="{StaticResource DangerBrush}"
+                           VerticalAlignment="Top" Margin="0,2,14,0" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="À lire avant de continuer" FontWeight="SemiBold" />
+                    <ItemsControl x:Name="WarningsList" Margin="0,2,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Style="{StaticResource SecondaryText}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border x:Name="RunningCard" Background="{StaticResource WarningSoft}" CornerRadius="12" Padding="16,12"
                 Margin="0,0,0,14" Visibility="Collapsed">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -61,6 +83,7 @@
                 </Button>
             </Grid>
         </Border>
+        </StackPanel>
 
         <!-- Liste -->
         <Grid Grid.Row="2">
@@ -81,7 +104,7 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource CardBackgroundRaised}" Margin="0,0,12,0">
-                                            <TextBlock Text="{Binding Glyph}" Style="{StaticResource IconText}" FontSize="15" Foreground="#5AB4FF"
+                                            <TextBlock Text="{Binding Glyph}" Style="{StaticResource IconText}" FontSize="15" Foreground="{StaticResource LinkBrush}"
                                                        HorizontalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -94,7 +117,7 @@
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock x:Name="ConsequenceIcon" Text="&#xE946;" Style="{StaticResource IconText}" FontSize="12"
-                                                           Foreground="#5AB4FF" VerticalAlignment="Top" Margin="0,2,7,0" />
+                                                           Foreground="{StaticResource LinkBrush}" VerticalAlignment="Top" Margin="0,2,7,0" />
                                                 <TextBlock x:Name="ConsequenceText" Grid.Column="1" Text="{Binding Target.DisplayConsequence}" FontSize="12"
                                                            TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" />
                                             </Grid>

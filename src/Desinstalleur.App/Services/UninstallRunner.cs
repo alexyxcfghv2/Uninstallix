@@ -11,10 +11,22 @@ public enum UninstallOutcome
     StillInstalled,
     /// <summary>Le désinstalleur du logiciel n'existe plus (installation abîmée).</summary>
     MissingUninstaller,
+    /// <summary>Le désinstalleur s'est terminé avec un code d'erreur et le logiciel est toujours là.</summary>
+    UninstallerError,
+    /// <summary>Le désinstalleur demande un redémarrage pour finir (codes 3010 / 1641).</summary>
+    RebootRequired,
     Failed,
 }
 
-public sealed record UninstallResult(UninstallOutcome Outcome, string Message);
+/// <param name="ExitCode">Code de sortie du désinstalleur, s'il a pu être lu.</param>
+public sealed record UninstallResult(UninstallOutcome Outcome, string Message, int? ExitCode = null)
+{
+    /// <summary>
+    /// Vrai si le désinstalleur officiel est absent ou en échec : une désinstallation forcée peut alors être proposée.
+    /// </summary>
+    public bool OfficialUninstallerBroken =>
+        Outcome is UninstallOutcome.MissingUninstaller or UninstallOutcome.UninstallerError or UninstallOutcome.Failed;
+}
 
 /// <summary>Lance le désinstalleur officiel d'un logiciel et attend qu'il ait fini.</summary>
 public static class UninstallRunner
@@ -45,6 +57,7 @@ public static class UninstallRunner
         Journal.Write($"Désinstallation de « {program.DisplayName} » : {command.FileName} {command.Arguments}");
 
         var helpersBefore = SnapshotHelperProcesses();
+        int? exitCode = null;
 
         try
         {
@@ -57,7 +70,10 @@ public static class UninstallRunner
             });
 
             if (process is not null)
+            {
                 await process.WaitForExitAsync(cancel);
+                exitCode = ReadExitCode(process);
+            }
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
@@ -84,13 +100,34 @@ public static class UninstallRunner
 
         if (ProgramInventory.StillExists(program))
         {
-            Journal.Write($"« {program.DisplayName} » est toujours installé après le désinstalleur.");
+            Journal.Write($"« {program.DisplayName} » est toujours installé après le désinstalleur (code de sortie : {exitCode?.ToString() ?? "inconnu"}).");
+            if (exitCode is 3010 or 1641)
+                return new(UninstallOutcome.RebootRequired,
+                    L.T("Redémarrez l'ordinateur pour terminer la désinstallation."), exitCode);
+            if (exitCode is { } code && code != 0 && !CancelExitCodes.Contains(code))
+                return new(UninstallOutcome.UninstallerError,
+                    L.F("Le désinstalleur s'est terminé avec une erreur (code {0}).", code), exitCode);
             return new(UninstallOutcome.StillInstalled,
-                L.T("Le logiciel est toujours installé : la désinstallation a peut-être été annulée."));
+                L.T("Le logiciel est toujours installé : la désinstallation a peut-être été annulée."), exitCode);
         }
 
         Journal.Write($"« {program.DisplayName} » désinstallé.");
-        return new(UninstallOutcome.Removed, L.T("Désinstallé avec succès."));
+        return new(UninstallOutcome.Removed, L.T("Désinstallé avec succès."), exitCode);
+    }
+
+    /// <summary>Codes qui signifient « annulé par l'utilisateur » (Windows Installer 1602, ERROR_CANCELLED 1223).</summary>
+    private static readonly HashSet<int> CancelExitCodes = new() { 1602, 1223 };
+
+    private static int? ReadExitCode(Process process)
+    {
+        try
+        {
+            return process.HasExited ? process.ExitCode : null;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     private static string SafeWorkingDirectory(string fileName)

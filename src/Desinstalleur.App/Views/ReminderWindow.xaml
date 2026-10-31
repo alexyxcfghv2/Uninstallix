@@ -16,7 +16,7 @@
     <Border x:Name="Panel" Margin="14" CornerRadius="14" Background="{StaticResource CardBackground}"
             BorderBrush="{StaticResource CardBorder}" BorderThickness="1" Padding="18,16,18,14">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.45" Color="#000000" />
+            <DropShadowEffect BlurRadius="18" ShadowDepth="4" Opacity="0.45" Color="{StaticResource ShadowColor}" />
         </Border.Effect>
         <StackPanel>
             <DockPanel>
@@ -26,7 +26,7 @@
                 </Button>
                 <Border x:Name="Badge" Width="40" Height="40" CornerRadius="20" Background="{StaticResource AccentSoft}"
                         DockPanel.Dock="Left" VerticalAlignment="Top">
-                    <TextBlock Text="&#xE74D;" Style="{StaticResource IconText}" FontSize="17" Foreground="#5AB4FF"
+                    <TextBlock Text="&#xE74D;" Style="{StaticResource IconText}" FontSize="17" Foreground="{StaticResource LinkBrush}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <StackPanel Margin="14,1,8,0">

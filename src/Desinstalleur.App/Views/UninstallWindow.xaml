@@ -55,7 +55,7 @@
                                         Background="{StaticResource CardBackgroundRaised}" VerticalAlignment="Center">
                                     <Grid>
                                         <TextBlock x:Name="InitialText" Text="{Binding Program.Initial}" FontWeight="SemiBold" FontSize="16"
-                                                   Foreground="#5AB4FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                   Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         <Image Source="{Binding Program.Icon}" Width="28" Height="28"
                                                Visibility="{Binding Program.HasIcon, Converter={StaticResource BoolToVisibility}}" />
                                     </Grid>
@@ -83,7 +83,7 @@
                             <DataTrigger Binding="{Binding IsBusy}" Value="True">
                                 <Setter TargetName="Card" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                                 <Setter TargetName="StatusPill" Property="Background" Value="{StaticResource AccentSoft}" />
-                                <Setter TargetName="StatusLabel" Property="Foreground" Value="#5AB4FF" />
+                                <Setter TargetName="StatusLabel" Property="Foreground" Value="{StaticResource LinkBrush}" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="Removed">
                                 <Setter TargetName="StatusPill" Property="Background" Value="{StaticResource SuccessSoft}" />
@@ -111,6 +111,7 @@
         <Grid x:Name="LeftoversPanel" Grid.Row="1" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -120,13 +121,26 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" Foreground="#5AB4FF" Margin="0,0,12,0" VerticalAlignment="Top" />
+                    <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" Foreground="{StaticResource LinkBrush}" Margin="0,0,12,0" VerticalAlignment="Top" />
                     <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextPrimary}"
                                Text="Rien n'a encore été supprimé. Les éléments « Sûr » sont cochés, les éléments « À vérifier » ne le sont pas. Les fichiers iront dans la Corbeille et les clés de registre seront sauvegardées." />
                 </Grid>
             </Border>
 
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Border x:Name="ForcedBanner" Grid.Row="1" Background="{StaticResource WarningSoft}" CornerRadius="12" Padding="16,12" Margin="0,0,0,14"
+                    Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="&#xE7BA;" Style="{StaticResource IconText}" Foreground="{StaticResource WarningBrush}" Margin="0,0,12,0" VerticalAlignment="Top" />
+                    <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextPrimary}"
+                               Text="Désinstallation forcée : le désinstalleur officiel n'a pas servi. Cochez l'entrée du logiciel dans la liste des programmes pour qu'il disparaisse de la liste, et fermez-le avant de supprimer ses fichiers. Vérifiez les éléments « À vérifier » avant de les cocher." />
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="LeftoverGroupsList">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -137,6 +151,10 @@
                                         <TextBlock Text="{Binding ProgramName}" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" />
                                         <Border Style="{StaticResource Badge}" Background="{StaticResource CardBackgroundRaised}" Margin="10,0,0,0">
                                             <TextBlock Text="{Binding CountText}" FontSize="11" Foreground="{StaticResource TextSecondary}" />
+                                        </Border>
+                                        <Border Style="{StaticResource Badge}" Background="{StaticResource WarningSoft}" Margin="8,0,0,0"
+                                                Visibility="{Binding IsForced, Converter={StaticResource BoolToVisibility}}">
+                                            <TextBlock Text="{Binding ForcedText}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" />
                                         </Border>
                                     </StackPanel>
 
@@ -160,7 +178,7 @@
                                                         <Border Grid.Column="1" Width="34" Height="34" CornerRadius="9" Margin="0,0,12,0"
                                                                 Background="{StaticResource CardBackgroundRaised}" ToolTip="{Binding KindText}">
                                                             <TextBlock Text="{Binding KindGlyph}" Style="{StaticResource IconText}" FontSize="15"
-                                                                       Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                                                                       Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                                                         </Border>
 
                                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">

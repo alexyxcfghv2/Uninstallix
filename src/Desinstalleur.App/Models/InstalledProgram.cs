@@ -38,6 +38,13 @@ public sealed class InstalledProgram : ObservableObject
     public string? ProtectionReason { get; init; }
     public bool IsProtected => ProtectionReason is not null;
 
+    /// <summary>
+    /// Raison du refus d'une désinstallation forcée (logiciel protégé ou favori protégé), sinon null.
+    /// Contrairement à la désinstallation officielle, le déverrouillage des protégés ne la permet pas.
+    /// </summary>
+    public string? ForcedUninstallRefusal => ProtectionReason
+        ?? (Favorites.IsProtectedProgram(DisplayName) ? L.T("il est dans vos favoris protégés (Réglages › Favoris protégés)") : null);
+
     public long? SizeBytes
     {
         get => _sizeBytes;

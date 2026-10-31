@@ -73,7 +73,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" Foreground="#5AB4FF" Margin="0,0,12,0" VerticalAlignment="Top" />
+                <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" Foreground="{StaticResource LinkBrush}" Margin="0,0,12,0" VerticalAlignment="Top" />
                 <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextPrimary}"
                            Text="Rien n'est coché d'office : ouvrez l'emplacement de chaque dossier et cochez seulement ceux dont vous êtes sûr. Les dossiers modifiés ces 30 derniers jours, ceux d'un logiciel installé ou en cours d'exécution et vos favoris protégés ne sont jamais proposés." />
             </Grid>
@@ -104,7 +104,7 @@
                                         <Border Grid.Column="1" Width="34" Height="34" CornerRadius="9" Margin="0,0,12,0"
                                                 Background="{StaticResource CardBackgroundRaised}">
                                             <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="15"
-                                                       Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                                                       Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                                         </Border>
 
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
@@ -145,7 +145,7 @@
                                     </Trigger>
                                     <DataTrigger Binding="{Binding Confidence}" Value="Likely">
                                         <Setter TargetName="Pill" Property="Background" Value="{StaticResource AccentSoft}" />
-                                        <Setter TargetName="PillText" Property="Foreground" Value="#5AB4FF" />
+                                        <Setter TargetName="PillText" Property="Foreground" Value="{StaticResource LinkBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Confidence}" Value="Check">
                                         <Setter TargetName="Pill" Property="Background" Value="{StaticResource WarningSoft}" />

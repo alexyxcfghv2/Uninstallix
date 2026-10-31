@@ -177,7 +177,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource CardBackgroundRaised}" Margin="0,0,12,0">
                                     <TextBlock x:Name="Icon" Text="{Binding Glyph}" Style="{StaticResource IconText}" FontSize="15"
-                                               Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                                               Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
@@ -220,7 +220,7 @@
                                 </Grid.ColumnDefinitions>
                                 <Border Width="34" Height="34" CornerRadius="9" Background="{StaticResource CardBackgroundRaised}" Margin="0,0,12,0">
                                     <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="15"
-                                               Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                                               Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
                                     <StackPanel Orientation="Horizontal">

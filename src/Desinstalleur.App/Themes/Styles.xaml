@@ -24,6 +24,20 @@
     <SolidColorBrush x:Key="WarningBrush" Color="#FFB547" />
     <SolidColorBrush x:Key="WarningSoft" Color="#3A2A10" />
 
+    <!-- Couleurs des contrôles (le thème clair les remplace au démarrage : voir Services/ThemeManager.cs) -->
+    <SolidColorBrush x:Key="HoverBorder" Color="#2C3D6E" />
+    <SolidColorBrush x:Key="ControlBorder" Color="#33416B" />
+    <SolidColorBrush x:Key="ControlBorderStrong" Color="#3A4A7A" />
+    <SolidColorBrush x:Key="DisabledFill" Color="#1A2547" />
+    <SolidColorBrush x:Key="TrackBackground" Color="#1A2547" />
+    <SolidColorBrush x:Key="LinkBrush" Color="#5AB4FF" />
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#2A3863" />
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#3D5090" />
+    <SolidColorBrush x:Key="SidebarBackground" Color="#0A1128" />
+    <Color x:Key="HaloColor">#1E6BFF</Color>
+    <Color x:Key="HaloEdgeColor">#001E6BFF</Color>
+    <Color x:Key="ShadowColor">#000000</Color>
+
     <LinearGradientBrush x:Key="AccentGradient" StartPoint="0,0" EndPoint="1,1">
         <GradientStop Color="#1670FF" Offset="0" />
         <GradientStop Color="{StaticResource AccentCyanColor}" Offset="1" />
@@ -100,7 +114,7 @@
                         </Grid.RenderTransform>
                         <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" />
-                        <Border x:Name="Hover" Background="{StaticResource HoverFill}" BorderBrush="#2C3D6E"
+                        <Border x:Name="Hover" Background="{StaticResource HoverFill}" BorderBrush="{StaticResource HoverBorder}"
                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Opacity="0" />
                         <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"
                                           RecognizesAccessKey="True" />
@@ -163,12 +177,12 @@
                         </Grid.RenderTransform>
                         <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="10">
                             <Border.Effect>
-                                <DropShadowEffect Color="#1E8BFF" BlurRadius="18" ShadowDepth="0" Opacity="0.45" />
+                                <DropShadowEffect Color="{StaticResource AccentColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.45" />
                             </Border.Effect>
                         </Border>
                         <Border x:Name="Hover" Background="{StaticResource AccentGradientHover}" CornerRadius="10" Opacity="0">
                             <Border.Effect>
-                                <DropShadowEffect Color="#18D6FF" BlurRadius="26" ShadowDepth="0" Opacity="0.55" />
+                                <DropShadowEffect Color="{StaticResource AccentCyanColor}" BlurRadius="26" ShadowDepth="0" Opacity="0.55" />
                             </Border.Effect>
                         </Border>
                         <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -210,7 +224,7 @@
                             </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Bd" Property="Background" Value="#1A2547" />
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource DisabledFill}" />
                             <Setter TargetName="Bd" Property="Effect" Value="{x:Null}" />
                             <Setter TargetName="Hover" Property="Visibility" Value="Collapsed" />
                             <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
@@ -261,7 +275,7 @@
                             </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Bd" Property="Background" Value="#1A2547" />
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource DisabledFill}" />
                             <Setter TargetName="Bd" Property="Effect" Value="{x:Null}" />
                             <Setter Property="Foreground" Value="{StaticResource TextDisabled}" />
                         </Trigger>
@@ -274,7 +288,7 @@
     <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="Foreground" Value="#5AB4FF" />
+        <Setter Property="Foreground" Value="{StaticResource LinkBrush}" />
     </Style>
 
     <!-- ===== Pastilles de tri (boutons radio) ===== -->
@@ -382,7 +396,7 @@
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
                         <Border x:Name="Track" Width="38" Height="20" CornerRadius="10" Background="{StaticResource InputBackground}"
-                                BorderBrush="#33416B" BorderThickness="1" VerticalAlignment="Center">
+                                BorderBrush="{StaticResource ControlBorder}" BorderThickness="1" VerticalAlignment="Center">
                             <Ellipse x:Name="Knob" Width="12" Height="12" Fill="{StaticResource TextSecondary}"
                                      HorizontalAlignment="Left" Margin="4,0,0,0">
                                 <Ellipse.RenderTransform>
@@ -442,7 +456,7 @@
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
                         <Border x:Name="Box" Width="20" Height="20" CornerRadius="6" Background="{StaticResource InputBackground}"
-                                BorderBrush="#3A4A7A" BorderThickness="1.5" VerticalAlignment="Center">
+                                BorderBrush="{StaticResource ControlBorderStrong}" BorderThickness="1.5" VerticalAlignment="Center">
                             <TextBlock x:Name="Mark" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="12"
                                        Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
                         </Border>
@@ -450,7 +464,7 @@
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Box" Property="BorderBrush" Value="#5AB4FF" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource LinkBrush}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Box" Property="Background" Value="{StaticResource AccentGradient}" />
@@ -497,7 +511,7 @@
                             <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="#2C3D6E" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource HoverBorder}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
@@ -521,10 +535,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border x:Name="T" CornerRadius="4" Background="#2A3863" />
+                    <Border x:Name="T" CornerRadius="4" Background="{StaticResource ScrollThumbBrush}" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="T" Property="Background" Value="#3D5090" />
+                            <Setter TargetName="T" Property="Background" Value="{StaticResource ScrollThumbHoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsDragging" Value="True">
                             <Setter TargetName="T" Property="Background" Value="{StaticResource AccentBrush}" />
@@ -721,7 +735,7 @@
 
     <Style TargetType="ProgressBar">
         <Setter Property="Foreground" Value="{StaticResource AccentGradient}" />
-        <Setter Property="Background" Value="#1A2547" />
+        <Setter Property="Background" Value="{StaticResource TrackBackground}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Height" Value="4" />
     </Style>

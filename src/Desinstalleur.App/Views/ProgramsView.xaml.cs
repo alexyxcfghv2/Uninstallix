@@ -336,6 +336,51 @@ public partial class ProgramsView : UserControl
         await StartUninstallAsync(new List<InstalledProgram> { p });
     }
 
+    /// <summary>
+    /// Désinstallation forcée : pour un logiciel dont le désinstalleur est cassé ou introuvable.
+    /// Uninstallix cherche lui-même ses fichiers, dossiers et clés (dont son entrée « Uninstall ») ;
+    /// rien n'est supprimé sans que l'utilisateur coche et confirme. Refusée pour les éléments protégés.
+    /// </summary>
+    private async void ForceUninstallOne_Click(object sender, RoutedEventArgs e)
+    {
+        if (ProgramsGrid.SelectedItem is not InstalledProgram p)
+            return;
+        if (p.ForcedUninstallRefusal is { } refusal)
+        {
+            Journal.Write($"Désinstallation forcée refusée pour « {p.DisplayName} » : élément protégé.");
+            MessageBox.Show(Host, L.F("« {0} » est protégé : {1}.", p.DisplayName, refusal) + "\n\n" +
+                L.T("La désinstallation forcée n'est jamais possible pour un élément protégé ou un favori protégé, même déverrouillé."),
+                L.T("Élément protégé"), MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var message = L.F("Faire une désinstallation forcée de « {0} » ?", p.DisplayName) + "\n\n" +
+            L.T("À utiliser seulement si son désinstalleur est cassé ou introuvable. Le désinstalleur officiel ne sera pas lancé : " +
+                "Uninstallix cherche lui-même le dossier d'installation, les fichiers, les raccourcis et les clés de registre du logiciel, " +
+                "y compris son entrée dans la liste des programmes.") + "\n\n";
+        message += "•  " + (AppSettings.Current.CreateRestorePoint
+            ? L.T("Un point de restauration Windows sera créé avant de commencer.")
+            : L.T("Aucun point de restauration ne sera créé (désactivé dans les réglages).")) + "\n";
+        message += "•  " + L.T("Vous verrez ensuite ce qui a été trouvé : seuls les éléments que vous cochez seront supprimés.") + "\n";
+        message += "•  " + (AppSettings.Current.UseRecycleBin
+            ? L.T("Les fichiers et dossiers iront dans la Corbeille.")
+            : L.T("Les fichiers et dossiers seront supprimés DÉFINITIVEMENT (Corbeille désactivée dans les réglages).")) + "\n";
+        message += "•  " + L.T("Chaque clé de registre sera sauvegardée dans un fichier .reg avant d'être supprimée.") + "\n";
+        if (p.IsMsi)
+            message += "•  " + L.T("Ce logiciel utilise Windows Installer : des informations internes de Windows Installer peuvent rester.") + "\n";
+        message += "\n" + L.T("Fermez le logiciel s'il est ouvert. Continuer ?");
+
+        var answer = MessageBox.Show(Host, message, L.T("Désinstallation forcée"),
+            MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+        if (answer != MessageBoxResult.Yes)
+            return;
+
+        Journal.Write($"Désinstallation forcée demandée pour « {p.DisplayName} ».");
+        var window = new UninstallWindow(new List<InstalledProgram> { p }, forced: true) { Owner = Host };
+        window.ShowDialog();
+        await ReloadAsync();
+    }
+
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
         if (ProgramsGrid.SelectedItem is not InstalledProgram p)

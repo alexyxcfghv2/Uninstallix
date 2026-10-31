@@ -30,8 +30,8 @@
                  IsHitTestVisible="False" Opacity="0.35">
             <Ellipse.Fill>
                 <RadialGradientBrush>
-                    <GradientStop Color="#1E6BFF" Offset="0" />
-                    <GradientStop Color="#001E6BFF" Offset="1" />
+                    <GradientStop Color="{StaticResource HaloColor}" Offset="0" />
+                    <GradientStop Color="{StaticResource HaloEdgeColor}" Offset="1" />
                 </RadialGradientBrush>
             </Ellipse.Fill>
         </Ellipse>

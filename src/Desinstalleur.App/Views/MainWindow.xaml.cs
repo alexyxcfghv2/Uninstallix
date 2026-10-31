@@ -26,6 +26,17 @@ public partial class MainWindow : Window
         Anim.FadeSlideIn(ProgramsPage, 18, 450, 120);
         if (AppSettings.Current.CheckUpdatesOnStartup)
             _ = CheckForUpdateAsync();
+
+        // Uninstallix fermé pendant le mode jeu : on ouvre la page pour proposer de tout rétablir.
+        try
+        {
+            if (GameMode.LoadState().Active)
+                Navigate("gamemode");
+        }
+        catch (Exception ex)
+        {
+            Journal.Write("État du mode jeu illisible : " + ex.Message);
+        }
     }
 
     private UpdateInfo? _update;
@@ -59,6 +70,9 @@ public partial class MainWindow : Window
     private CleanupView? _cleanupPage;
     private OrphansView? _orphansPage;
     private StartupView? _startupPage;
+    private FilesView? _filesPage;
+    private WindowsAppsView? _windowsAppsPage;
+    private GameModeView? _gameModePage;
     private DiskView? _diskPage;
     private HistoryView? _historyPage;
     private SettingsView? _settingsPage;
@@ -76,6 +90,12 @@ public partial class MainWindow : Window
             page = _orphansPage ??= AddPage(new OrphansView());
         else if (sender == NavStartup)
             page = _startupPage ??= AddPage(new StartupView());
+        else if (sender == NavFiles)
+            page = _filesPage ??= AddPage(new FilesView());
+        else if (sender == NavWindowsApps)
+            page = _windowsAppsPage ??= AddPage(new WindowsAppsView());
+        else if (sender == NavGameMode)
+            page = _gameModePage ??= AddPage(new GameModeView());
         else if (sender == NavDisk)
             page = _diskPage ??= AddPage(new DiskView());
         else if (sender == NavHistory)
@@ -102,6 +122,9 @@ public partial class MainWindow : Window
             "cleanup" => NavCleanup,
             "orphans" => NavOrphans,
             "startup" => NavStartup,
+            "files" => NavFiles,
+            "windowsapps" => NavWindowsApps,
+            "gamemode" => NavGameMode,
             "disk" => NavDisk,
             "history" => NavHistory,
             "settings" => NavSettings,

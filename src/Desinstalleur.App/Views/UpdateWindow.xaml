@@ -21,7 +21,7 @@
 
         <StackPanel x:Name="Header" Orientation="Horizontal" Margin="0,0,0,18">
             <Border x:Name="Badge" Width="52" Height="52" CornerRadius="26" Background="{StaticResource AccentSoft}">
-                <TextBlock Text="&#xE896;" Style="{StaticResource IconText}" FontSize="22" Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                <TextBlock Text="&#xE896;" Style="{StaticResource IconText}" FontSize="22" Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
             </Border>
             <StackPanel VerticalAlignment="Center" Margin="16,0,0,0">
                 <TextBlock x:Name="TitleText" Text="Nouvelle version disponible" FontFamily="{StaticResource DisplayFont}" FontSize="22"

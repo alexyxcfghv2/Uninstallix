@@ -31,6 +31,12 @@ public sealed class AppSettings
     /// <summary>Langue de l'interface : « auto » (celle de Windows), « fr » ou « en ».</summary>
     public string Language { get; set; } = "auto";
 
+    /// <summary>Thème de l'interface : « sombre », « clair » ou « auto » (celui des applications Windows). Appliqué au démarrage.</summary>
+    public string Theme { get; set; } = ThemeManager.Dark;
+
+    /// <summary>Couleur d'accent : « bleu », « violet », « vert », « orange », « rose », « rouge » ou « windows ». Appliquée au démarrage.</summary>
+    public string Accent { get; set; } = ThemeManager.DefaultAccent;
+
     /// <summary>Petites animations de l'interface (apparitions, compteurs).</summary>
     public bool EnableAnimations { get; set; } = true;
 

@@ -20,13 +20,19 @@ public sealed class LeftoverScanner
         _stillInstalled = stillInstalled;
     }
 
-    public List<LeftoverItem> Scan(InstalledProgram program)
+    /// <param name="forced">Désinstallation forcée : le logiciel est encore installé et son désinstalleur n'a pas servi.
+    /// On cherche aussi son dossier d'après son désinstalleur ou son icône, et toutes ses entrées « Uninstall ».</param>
+    public List<LeftoverItem> Scan(InstalledProgram program, bool forced = false)
     {
         var found = new Dictionary<string, LeftoverItem>(StringComparer.OrdinalIgnoreCase);
 
         // 1. Le dossier d'installation déclaré, s'il existe encore.
         if (!string.IsNullOrWhiteSpace(program.InstallLocation) && Directory.Exists(program.InstallLocation))
             AddFolder(found, program, program.InstallLocation!, MatchConfidence.High, L.T("Dossier d'installation déclaré par le logiciel"));
+
+        // 1 bis. Désinstallation forcée sans dossier déclaré : on le déduit du désinstalleur ou de l'icône.
+        if (forced)
+            AddProbableInstallFolders(found, program);
 
         // 2. Sous-dossiers portant le nom du logiciel (ou rangés dans un dossier à son éditeur).
         foreach (var root in KnownLocations.FolderRoots)
@@ -43,7 +49,10 @@ public sealed class LeftoverScanner
         ScanRegistry(found, program, RegistryHive.CurrentUser, @"SOFTWARE");
         ScanRegistry(found, program, RegistryHive.LocalMachine, @"SOFTWARE");
         ScanRegistry(found, program, RegistryHive.LocalMachine, @"SOFTWARE\WOW6432Node");
-        AddOrphanUninstallKey(found, program);
+        if (forced)
+            AddProgramUninstallKeys(found, program);
+        else
+            AddOrphanUninstallKey(found, program);
 
         return RemoveNested(found.Values)
             .OrderByDescending(i => i.Confidence)
@@ -217,6 +226,90 @@ public sealed class LeftoverScanner
     {
         if (ProgramInventory.StillExists(program))
             AddKey(found, program, program.Hive, program.KeyPath, null, MatchConfidence.High, L.T("Entrée de désinstallation orpheline"));
+    }
+
+    /// <summary>
+    /// Désinstallation forcée : l'entrée du logiciel dans la liste des programmes (et ses doublons éventuels).
+    /// C'est elle qui le fait disparaître de la liste une fois supprimée.
+    /// </summary>
+    private void AddProgramUninstallKeys(Dictionary<string, LeftoverItem> found, InstalledProgram program)
+    {
+        if (ProgramInventory.StillExists(program))
+            AddKey(found, program, program.Hive, program.KeyPath, null, MatchConfidence.High,
+                L.T("Entrée du logiciel dans la liste des programmes installés"));
+        foreach (var (hive, keyPath) in ProgramInventory.FindSameEntries(program))
+            AddKey(found, program, hive, keyPath, null, MatchConfidence.High, L.T("Autre entrée du même logiciel dans la liste des programmes"));
+    }
+
+    /// <summary>
+    /// Dossier probable du logiciel, déduit de l'emplacement de son désinstalleur ou de son icône.
+    /// Marqué « Sûr » seulement si le dossier porte le nom du logiciel ; sinon « À vérifier ».
+    /// </summary>
+    private void AddProbableInstallFolders(Dictionary<string, LeftoverItem> found, InstalledProgram program)
+    {
+        var candidates = new List<(string? File, string Reason)>();
+        try
+        {
+            var command = UninstallCommand.Parse(program.UninstallString);
+            if (command is not null && !command.IsMsi)
+                candidates.Add((command.FileName, L.T("Dossier du logiciel, déduit de l'emplacement de son désinstalleur")));
+        }
+        catch
+        {
+            // Commande illisible : on passe à l'icône.
+        }
+        candidates.Add((IconFile(program.DisplayIconPath), L.T("Dossier du logiciel, déduit de l'emplacement de son icône")));
+
+        foreach (var (file, reason) in candidates)
+        {
+            var folder = FolderOf(file, program);
+            if (folder is null || !Directory.Exists(folder))
+                continue;
+            var confidence = NameMatcher.Match(Path.GetFileName(folder), program.DisplayName, program.Publisher);
+            AddFolder(found, program, folder, confidence == MatchConfidence.None ? MatchConfidence.Low : confidence, reason);
+        }
+    }
+
+    /// <summary>« "C:\App\app.exe",0 » → « C:\App\app.exe ».</summary>
+    private static string? IconFile(string? displayIcon)
+    {
+        if (string.IsNullOrWhiteSpace(displayIcon))
+            return null;
+        var value = Environment.ExpandEnvironmentVariables(displayIcon.Trim());
+        var comma = value.LastIndexOf(',');
+        if (comma > 0 && int.TryParse(value[(comma + 1)..].Trim(), out _))
+            value = value[..comma];
+        return value.Trim().Trim('"');
+    }
+
+    /// <summary>
+    /// Dossier qui contient le fichier ; si ce dossier a un nom générique (« bin », « uninstall »…)
+    /// et que son parent porte le nom du logiciel, on remonte d'un cran.
+    /// </summary>
+    private static string? FolderOf(string? file, InstalledProgram program)
+    {
+        if (string.IsNullOrWhiteSpace(file))
+            return null;
+        try
+        {
+            if (!Path.IsPathRooted(file))
+                return null;
+            var dir = Path.GetDirectoryName(Path.GetFullPath(file));
+            if (string.IsNullOrEmpty(dir))
+                return null;
+            if (NameMatcher.Match(Path.GetFileName(dir), program.DisplayName, program.Publisher) == MatchConfidence.None)
+            {
+                var parent = Path.GetDirectoryName(dir);
+                if (!string.IsNullOrEmpty(parent)
+                    && NameMatcher.Match(Path.GetFileName(parent), program.DisplayName, program.Publisher) != MatchConfidence.None)
+                    return parent;
+            }
+            return dir;
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
     }
 
     private void AddKey(Dictionary<string, LeftoverItem> found, InstalledProgram program, RegistryHive hive, string subKey,

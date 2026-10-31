@@ -20,6 +20,37 @@
             <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
             <Setter Property="Margin" Value="4,0,0,8" />
         </Style>
+        <!-- Pastille ronde de couleur d'accent (la couleur est dans Background) -->
+        <Style x:Key="AccentSwatch" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid Width="32" Height="32" Background="Transparent">
+                            <Ellipse x:Name="Ring" Stroke="{StaticResource TextPrimary}" StrokeThickness="2" Opacity="0" />
+                            <Ellipse x:Name="Dot" Width="22" Height="22" Fill="{TemplateBinding Background}"
+                                     Stroke="{StaticResource CardBorder}" StrokeThickness="1" />
+                            <TextBlock x:Name="Mark" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" FontSize="11" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Ring" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Ring" Property="Opacity" Value="1" />
+                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Dot" Property="Opacity" Value="0.35" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -93,6 +124,36 @@
             <TextBlock Text="APPARENCE" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}" Margin="0,0,0,22">
                 <StackPanel>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" VerticalAlignment="Center" Background="{StaticResource InputBackground}"
+                                    BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="11" Padding="4">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="ThemeDark" GroupName="Theme" Style="{StaticResource SegmentButton}"
+                                                 Content="Sombre" Tag="sombre" Checked="Theme_Checked" />
+                                    <RadioButton x:Name="ThemeLight" GroupName="Theme" Style="{StaticResource SegmentButton}"
+                                                 Content="Clair" Tag="clair" Checked="Theme_Checked" />
+                                    <RadioButton x:Name="ThemeAuto" GroupName="Theme" Style="{StaticResource SegmentButton}"
+                                                 Content="Automatique" Tag="auto" Checked="Theme_Checked" />
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Thème" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="« Automatique » suit le mode clair ou sombre des applications Windows. Le changement s'applique au prochain démarrage."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <Border Style="{StaticResource SettingRow}">
+                        <DockPanel>
+                            <StackPanel x:Name="AccentSwatches" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" />
+                            <StackPanel Margin="0,0,20,0">
+                                <TextBlock Text="Couleur d'accent" Style="{StaticResource SettingTitle}" />
+                                <TextBlock Text="Couleur des boutons principaux, des sélections et des barres de progression. Le changement s'applique au prochain démarrage."
+                                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
                     <Border Style="{StaticResource SettingRow}">
                         <DockPanel>
                             <Border DockPanel.Dock="Right" VerticalAlignment="Center" Background="{StaticResource InputBackground}"
@@ -258,7 +319,7 @@
                                                 ToolTip="Retirer des favoris">
                                             <TextBlock Text="&#xE711;" Style="{StaticResource IconText}" FontSize="12" />
                                         </Button>
-                                        <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="13" Foreground="#5AB4FF"
+                                        <TextBlock Text="&#xE8B7;" Style="{StaticResource IconText}" FontSize="13" Foreground="{StaticResource LinkBrush}"
                                                    Margin="0,0,10,0" DockPanel.Dock="Left" />
                                         <TextBlock Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                     </DockPanel>

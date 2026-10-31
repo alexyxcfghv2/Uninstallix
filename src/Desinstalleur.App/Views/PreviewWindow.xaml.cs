@@ -42,6 +42,15 @@ public partial class PreviewWindow : Window
                 ? "{0} fichiers seront supprimés définitivement. Ils seront recréés si besoin ; vos jeux, comptes et réglages ne sont pas touchés."
                 : "{0} fichier sera supprimé définitivement. Il sera recréé si besoin ; vos jeux, comptes et réglages ne sont pas touchés.", files);
         CleanButton.IsEnabled = files > 0;
+
+        // Avertissements des éléments à conséquence importante (Windows.old, Windows Update…), seulement s'il y a quelque chose à supprimer.
+        var warnings = previews.Where(p => !p.IsEmpty && p.Target.DisplayWarning is not null)
+                               .Select(p => "• " + p.Target.DisplayWarning)
+                               .ToList();
+        WarningsList.ItemsSource = warnings;
+        WarningCard.Visibility = warnings.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (warnings.Count > 0)
+            Anim.FadeSlideIn(WarningCard, 8);
         await RefreshRunningAsync();
     }
 

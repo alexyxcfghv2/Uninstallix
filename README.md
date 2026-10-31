@@ -29,16 +29,20 @@ Nothing else to install: everything is included. Uninstallix tells you by itself
 ## What Uninstallix does
 
 - **Programs**: list with size and date, search, sorting, uninstall one or several programs in a row,
-  then scan for leftovers (files, folders, registry). Nothing is deleted without your approval, and essential
+  then scan for leftovers (files, folders, registry). Forced uninstall when a program's uninstaller is broken. Nothing is deleted without your approval, and essential
   Windows components are protected.
-- **Cleanup**: caches of FiveM, Discord, Chrome, Edge, Steam, Roblox, Rockstar Games Launcher, shaders, temporary files and the Recycle Bin,
+- **Cleanup**: caches of FiveM, Discord, Chrome, Edge, Steam, Epic Games, Battle.net, EA app, Ubisoft Connect, Riot, Rockstar Games
+  Launcher, Minecraft, Spotify, Teams, shaders, Windows Update, temporary files and the Recycle Bin,
   each one explained, with a preview of what will be deleted and profiles (Gaming, Browsers, Custom). Frees RAM and
   flushes the DNS cache.
 - **Forgotten leftovers**: find folders left behind by programs you already uninstalled, and review them before cleaning.
 - **Startup**: see the apps that start with Windows and turn them off in one click.
+- **Files**: find duplicate files and forgotten installers, archives and big files.
+- **Windows apps**: remove preinstalled apps like Candy Crush, with a clear "safe to remove" label.
+- **Game mode**: close background apps, free RAM and switch to high performance before playing.
 - **Disk space**: find what takes the most room, and see what grew since your last analysis.
 - **History**, **protected favorites**, an optional **cleanup reminder** and **settings** (restore point, Recycle Bin,
-  animations, language…).
+  light or dark theme, accent color, animations, language…).
 
 ## License
 

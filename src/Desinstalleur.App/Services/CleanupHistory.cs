@@ -27,7 +27,13 @@ public sealed class HistoryEntry
     [JsonIgnore]
     public bool HasErrors => Errors > 0;
     [JsonIgnore]
-    public string Glyph => Kind.StartsWith("Restes", StringComparison.Ordinal) ? "" : "";
+    public string Glyph => Kind switch
+    {
+        "Restes de logiciels" or "Restes oubliés" or "Désinstallation forcée" => "",
+        "Fichiers en double" or "Gros fichiers oubliés" => "",
+        "Applis Windows" => "",
+        _ => "",
+    };
 }
 
 /// <summary>Historique des nettoyages, enregistré dans %LocalAppData%\Uninstallix\historique.json.</summary>

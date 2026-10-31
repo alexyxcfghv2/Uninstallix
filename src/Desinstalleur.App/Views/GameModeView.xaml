@@ -1,0 +1,249 @@
+<UserControl x:Class="Desinstalleur.App.Views.GameModeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:services="clr-namespace:Desinstalleur.App.Services"
+             Foreground="{StaticResource TextPrimary}">
+
+    <Grid Margin="28,24,28,22">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- En-tête -->
+        <Grid Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Mode jeu" Style="{StaticResource TitleText}" />
+                <TextBlock Text="Libérez votre PC avant de jouer : fermez les applications inutiles, libérez la RAM, puis rouvrez tout après."
+                           Style="{StaticResource SecondaryText}" TextWrapping="Wrap" Margin="1,3,0,0" />
+            </StackPanel>
+            <Border Grid.Column="1" Style="{StaticResource StatChip}" Margin="16,0,10,0">
+                <StackPanel>
+                    <TextBlock x:Name="FreeRamText" Text="—" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" />
+                    <TextBlock Text="RAM libre" Style="{StaticResource SecondaryText}" FontSize="12" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource StatChip}">
+                <StackPanel>
+                    <TextBlock x:Name="SelectedCountText" Text="0" FontSize="18" FontWeight="SemiBold" />
+                    <TextBlock Text="à fermer" Style="{StaticResource SecondaryText}" FontSize="12" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Mode jeu resté actif après une fermeture d'Uninstallix -->
+        <Border x:Name="RestoreBanner" Grid.Row="1" Style="{StaticResource Card}" Background="{StaticResource WarningSoft}"
+                Padding="18,14" Margin="0,0,0,14" Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xE7BA;" Style="{StaticResource IconText}" FontSize="18" Foreground="{StaticResource WarningBrush}"
+                           VerticalAlignment="Center" Margin="0,0,14,0" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Le mode jeu est toujours actif" FontWeight="SemiBold" />
+                    <TextBlock x:Name="RestoreBannerText" Style="{StaticResource SecondaryText}" FontSize="12.5" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+                <Button Grid.Column="2" Style="{StaticResource AccentButton}" Padding="16,9" Margin="14,0,0,0" VerticalAlignment="Center"
+                        Click="Deactivate_Click" Content="Tout rétablir" />
+            </Grid>
+        </Border>
+
+        <!-- Action principale -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="20,16" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Width="42" Height="42" CornerRadius="11" Background="{StaticResource AccentSoft}" Margin="0,0,16,0" VerticalAlignment="Center">
+                    <TextBlock Text="&#xE7FC;" Style="{StaticResource IconText}" FontSize="18" Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="StateTitle" Text="Mode jeu désactivé" FontWeight="SemiBold" FontSize="15" />
+                    <TextBlock x:Name="StateDetail" Style="{StaticResource SecondaryText}" FontSize="12.5" TextWrapping="Wrap" Margin="0,2,0,8"
+                               Text="Cochez « Fermer » pour les applications à fermer. Vos choix sont mémorisés." />
+                    <CheckBox x:Name="HighPerformanceCheck" Style="{StaticResource ToggleSwitch}" HorizontalAlignment="Left"
+                              Content="Passer en mode d'alimentation « Performances élevées » pendant le jeu"
+                              ToolTip="Le mode d'alimentation actuel est rétabli à la désactivation."
+                              Click="HighPerformance_Click" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <Button x:Name="ActivateButton" Style="{StaticResource AccentButton}" Padding="22,12" FontSize="14" Click="Activate_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE768;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" Foreground="White" />
+                            <TextBlock Text="Activer le mode jeu" />
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="DeactivateButton" Style="{StaticResource AccentButton}" Padding="22,12" FontSize="14"
+                            Click="Deactivate_Click" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE777;" Style="{StaticResource IconText}" FontSize="14" Margin="0,0,8,0" Foreground="White" />
+                            <TextBlock Text="Désactiver le mode jeu" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Résultat -->
+        <Border x:Name="ResultCard" Grid.Row="3" Style="{StaticResource Card}" Padding="20,14" Margin="0,0,0,14" Visibility="Collapsed">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="ResultIcon" Text="&#xE73E;" Style="{StaticResource IconText}" FontSize="15"
+                               Foreground="{StaticResource SuccessBrush}" Margin="0,0,10,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="ResultTitle" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock x:Name="ResultText" Style="{StaticResource SecondaryText}" FontSize="12.5" TextWrapping="Wrap" Margin="25,4,0,0" />
+                <Grid x:Name="RefusedPanel" Margin="25,10,0,0" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Ces applications ne se sont pas fermées (elles restent peut-être dans la zone de notification) :"
+                                   FontSize="12.5" TextWrapping="Wrap" Foreground="{StaticResource WarningBrush}" />
+                        <TextBlock x:Name="RefusedText" FontSize="12.5" TextWrapping="Wrap" Margin="0,3,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource DangerButton}" Padding="14,8" Margin="14,0,0,0" VerticalAlignment="Center"
+                            Click="ForceClose_Click" Content="Forcer la fermeture"
+                            ToolTip="Ferme ces applications sans leur demander : un travail non enregistré y serait perdu." />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Liste -->
+        <Border Grid.Row="4" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Margin="20,10,14,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ListHeader" Text="APPLICATIONS OUVERTES" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                    <Button x:Name="RefreshButton" Grid.Column="1" Style="{StaticResource GhostButton}" Padding="10,6" Click="Refresh_Click"
+                            ToolTip="Relire la liste des applications ouvertes">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE72C;" Style="{StaticResource IconText}" FontSize="12" Margin="0,0,6,0" />
+                            <TextBlock Text="Actualiser" FontSize="12.5" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Applications ouvertes (mode jeu désactivé) -->
+                <ScrollViewer x:Name="AppsScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
+                    <ItemsControl x:Name="AppsList" Margin="8,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="Row" Background="Transparent" CornerRadius="10" Padding="12,9" Margin="0,1"
+                                        services:Anim.EnterOnLoad="True">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="38" Height="38" CornerRadius="10" Background="{StaticResource CardBackgroundRaised}"
+                                                Margin="0,0,14,0">
+                                            <Grid>
+                                                <TextBlock Text="&#xE7C4;" Style="{StaticResource IconText}" FontSize="16"
+                                                           Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+                                                <Image Source="{Binding Icon}" Width="26" Height="26" RenderOptions.BitmapScalingMode="HighQuality"
+                                                       Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel x:Name="Info" Grid.Column="1" VerticalAlignment="Center">
+                                            <WrapPanel>
+                                                <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" Margin="0,0,10,0"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <Border x:Name="VoiceBadge" Style="{StaticResource Badge}" Background="{StaticResource SuccessSoft}"
+                                                        Padding="7,1" Visibility="Collapsed"
+                                                        ToolTip="Application vocale ou de diffusion : on la garde en général pendant le jeu.">
+                                                    <TextBlock Text="Vocal : conseillé de garder" FontSize="11" Foreground="{StaticResource SuccessBrush}" />
+                                                </Border>
+                                            </WrapPanel>
+                                            <TextBlock Text="{Binding DetailText}" ToolTip="{Binding ExePath}" Style="{StaticResource SecondaryText}"
+                                                       FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding RamText}" Style="{StaticResource SecondaryText}" FontSize="13"
+                                                   VerticalAlignment="Center" Margin="12,0,18,0" ToolTip="Mémoire vive utilisée" />
+                                        <CheckBox Grid.Column="3" VerticalAlignment="Center" Content="Fermer" Foreground="{StaticResource TextPrimary}"
+                                                  IsChecked="{Binding Close, Mode=TwoWay}" Click="CloseCheck_Click" />
+                                    </Grid>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <Trigger SourceName="Row" Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Row" Property="Background" Value="{StaticResource HoverFill}" />
+                                    </Trigger>
+                                    <DataTrigger Binding="{Binding IsVoice}" Value="True">
+                                        <Setter TargetName="VoiceBadge" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Applications fermées (mode jeu actif) -->
+                <ScrollViewer x:Name="ClosedScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8" Visibility="Collapsed">
+                    <ItemsControl x:Name="ClosedList" Margin="8,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="Row" Background="Transparent" CornerRadius="10" Padding="12,9" Margin="0,1"
+                                        services:Anim.EnterOnLoad="True">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="38" Height="38" CornerRadius="10" Background="{StaticResource CardBackgroundRaised}"
+                                                Margin="0,0,14,0">
+                                            <Grid>
+                                                <TextBlock Text="&#xE7C4;" Style="{StaticResource IconText}" FontSize="16"
+                                                           Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+                                                <Image Source="{Binding Icon}" Width="26" Height="26" RenderOptions.BitmapScalingMode="HighQuality"
+                                                       Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
+                                            </Grid>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding ExePath}" ToolTip="{Binding ExePath}" Style="{StaticResource SecondaryText}"
+                                                       FontSize="11.5" FontFamily="Consolas" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <Trigger SourceName="Row" Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Row" Property="Background" Value="{StaticResource HoverFill}" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBlock x:Name="EmptyText" Grid.Row="1" Style="{StaticResource SecondaryText}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" TextWrapping="Wrap" Margin="20" Visibility="Collapsed" />
+                <TextBlock x:Name="BusyText" Grid.Row="1" Style="{StaticResource SecondaryText}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" Visibility="Collapsed" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

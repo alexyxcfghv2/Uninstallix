@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Desinstalleur.App.Services;
 
 namespace Desinstalleur.App.Views;
@@ -17,6 +18,8 @@ public partial class SettingsView : UserControl
         _loadingLanguage = true;
         (AppSettings.Current.Language switch { "fr" => LanguageFrench, "en" => LanguageEnglish, _ => LanguageAuto }).IsChecked = true;
         _loadingLanguage = false;
+
+        LoadAppearance();
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         IsVisibleChanged += (_, _) =>
@@ -47,9 +50,82 @@ public partial class SettingsView : UserControl
             return;
         AppSettings.Current.Language = language;
         AppSettings.Current.Save();
+        OfferRestart(L.T("La nouvelle langue s'appliquera au prochain démarrage d'Uninstallix. Redémarrer maintenant ?"), L.T("Langue"));
+    }
 
-        if (MessageBox.Show(L.T("La nouvelle langue s'appliquera au prochain démarrage d'Uninstallix. Redémarrer maintenant ?"),
-                L.T("Langue"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+    // ----- Thème et couleur d'accent -----
+
+    private bool _loadingAppearance;
+
+    private void LoadAppearance()
+    {
+        _loadingAppearance = true;
+        (AppSettings.Current.Theme switch
+        {
+            ThemeManager.Light => ThemeLight,
+            ThemeManager.Auto => ThemeAuto,
+            _ => ThemeDark,
+        }).IsChecked = true;
+
+        var style = (Style)FindResource("AccentSwatch");
+        var current = AppSettings.Current.Accent;
+        foreach (var accent in ThemeManager.Accents)
+            AccentSwatches.Children.Add(MakeSwatch(style, accent.Id, L.T(accent.Name), new SolidColorBrush(accent.Main), accent.Id == current));
+
+        // Couleur de Windows, séparée des couleurs proposées par un petit trait.
+        AccentSwatches.Children.Add(new Border
+        {
+            Width = 1, Height = 20, Margin = new Thickness(4, 0, 10, 0), VerticalAlignment = VerticalAlignment.Center,
+            Background = (Brush)FindResource("CardBorder"),
+        });
+        var windows = ThemeManager.WindowsAccentColor();
+        var windowsSwatch = MakeSwatch(style, ThemeManager.WindowsAccent,
+            windows is null ? L.T("Couleur de Windows (illisible sur ce PC)") : L.T("Couleur de Windows"),
+            windows is { } color ? new SolidColorBrush(color) : (Brush)FindResource("TextDisabled"),
+            current == ThemeManager.WindowsAccent);
+        windowsSwatch.IsEnabled = windows is not null || current == ThemeManager.WindowsAccent;
+        ToolTipService.SetShowOnDisabled(windowsSwatch, true);
+        AccentSwatches.Children.Add(windowsSwatch);
+
+        if (!AccentSwatches.Children.OfType<RadioButton>().Any(r => r.IsChecked == true))
+            AccentSwatches.Children.OfType<RadioButton>().First().IsChecked = true;
+        _loadingAppearance = false;
+    }
+
+    private RadioButton MakeSwatch(Style style, string id, string name, Brush color, bool isChecked)
+    {
+        var swatch = new RadioButton
+        {
+            Style = style, GroupName = "Accent", Tag = id, Background = color, ToolTip = name, IsChecked = isChecked,
+        };
+        System.Windows.Automation.AutomationProperties.SetName(swatch, name);
+        swatch.Checked += Accent_Checked;
+        return swatch;
+    }
+
+    private void Theme_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingAppearance || sender is not RadioButton { Tag: string theme } || theme == AppSettings.Current.Theme)
+            return;
+        AppSettings.Current.Theme = theme;
+        AppSettings.Current.Save();
+        OfferRestart(L.T("Le nouveau thème s'appliquera au prochain démarrage d'Uninstallix. Redémarrer maintenant ?"), L.T("Thème"));
+    }
+
+    private void Accent_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_loadingAppearance || sender is not RadioButton { Tag: string accent } || accent == AppSettings.Current.Accent)
+            return;
+        AppSettings.Current.Accent = accent;
+        AppSettings.Current.Save();
+        OfferRestart(L.T("La nouvelle couleur d'accent s'appliquera au prochain démarrage d'Uninstallix. Redémarrer maintenant ?"),
+            L.T("Couleur d'accent"));
+    }
+
+    /// <summary>Propose de relancer Uninstallix pour appliquer un réglage lu au démarrage.</summary>
+    private static void OfferRestart(string message, string title)
+    {
+        if (MessageBox.Show(message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
         try
         {

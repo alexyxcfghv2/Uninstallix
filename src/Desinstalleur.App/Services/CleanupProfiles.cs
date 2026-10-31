@@ -15,7 +15,8 @@ public static class CleanupProfiles
     public static Dictionary<string, List<string>> Defaults() => new()
     {
         [Custom] = new() { "Fichiers temporaires", "FiveM", "Discord", "Rapports d'erreurs" },
-        [Gaming] = new() { "Fichiers temporaires", "FiveM", "Discord", "Steam", "Roblox", "Rockstar Games Launcher", "Cache des shaders" },
+        [Gaming] = new() { "Fichiers temporaires", "FiveM", "Discord", "Steam", "Roblox", "Rockstar Games Launcher", "Cache des shaders",
+            "Epic Games Launcher", "Battle.net", "EA app", "Ubisoft Connect", "Riot Client", "Minecraft" },
         [Browsers] = new() { "Google Chrome", "Microsoft Edge" },
     };
 

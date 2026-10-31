@@ -63,7 +63,7 @@
                     BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="12" Padding="4">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Trier" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="10,0,10,0" />
-                    <Rectangle Width="1" Height="20" Fill="#33416B" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Rectangle Width="1" Height="20" Fill="{StaticResource ControlBorder}" VerticalAlignment="Center" Margin="0,0,6,0" />
                     <RadioButton GroupName="Sort" Style="{StaticResource SegmentButton}" Content="Nom" Tag="0"
                                  IsChecked="True" Checked="Sort_Checked" />
                     <RadioButton GroupName="Sort" Style="{StaticResource SegmentButton}" Content="Taille" Tag="1" Checked="Sort_Checked" />
@@ -103,6 +103,8 @@
                     <DataGrid.ContextMenu>
                         <ContextMenu Opened="ProgramMenu_Opened">
                             <MenuItem Header="Désinstaller ce logiciel" Click="UninstallOne_Click" />
+                            <MenuItem Header="Désinstallation forcée…" Click="ForceUninstallOne_Click"
+                                      ToolTip="Pour un logiciel dont le désinstalleur est cassé ou introuvable : Uninstallix supprime lui-même ses fichiers et ses clés, après validation." />
                             <MenuItem x:Name="FavoriteMenuItem" Header="Ajouter aux favoris protégés" Click="ToggleFavorite_Click" />
                             <MenuItem Header="Ouvrir le dossier d'installation" Click="OpenFolder_Click" />
                             <MenuItem Header="Copier le nom" Click="CopyName_Click" />
@@ -132,7 +134,7 @@
                                                 Background="{StaticResource CardBackgroundRaised}" VerticalAlignment="Center">
                                             <Grid>
                                                 <TextBlock x:Name="InitialText" Text="{Binding Initial}" FontWeight="SemiBold" FontSize="15"
-                                                           Foreground="#5AB4FF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                           Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                 <Image Source="{Binding Icon}" Width="26" Height="26" RenderOptions.BitmapScalingMode="HighQuality"
                                                        Visibility="{Binding HasIcon, Converter={StaticResource BoolToVisibility}}" />
                                             </Grid>
@@ -208,7 +210,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Width="34" Height="34" CornerRadius="10" Background="{StaticResource AccentSoft}" Margin="0,0,12,0">
-                    <TextBlock Text="&#xE73A;" Style="{StaticResource IconText}" FontSize="15" Foreground="#5AB4FF"
+                    <TextBlock Text="&#xE73A;" Style="{StaticResource IconText}" FontSize="15" Foreground="{StaticResource LinkBrush}"
                                HorizontalAlignment="Center" />
                 </Border>
                 <TextBlock x:Name="SelectionText" Grid.Column="1" VerticalAlignment="Center" FontSize="14"

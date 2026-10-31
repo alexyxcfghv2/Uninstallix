@@ -51,7 +51,7 @@ public sealed class QueueItem : ObservableObject
         QueueStatus.Running => L.T("Désinstallation en cours…"),
         QueueStatus.Scanning => L.T("Recherche des restes…"),
         QueueStatus.Removed => L.T("Désinstallé"),
-        QueueStatus.ForcedCleanup => L.T("Nettoyage forcé"),
+        QueueStatus.ForcedCleanup => L.T("Désinstallation forcée"),
         QueueStatus.StillInstalled => L.T("Toujours installé"),
         QueueStatus.Failed => L.T("Échec"),
         QueueStatus.Skipped => L.T("Ignoré"),

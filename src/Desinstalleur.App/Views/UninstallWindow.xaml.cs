@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using Desinstalleur.App.Models;
 using Desinstalleur.App.Services;
@@ -10,6 +11,9 @@ namespace Desinstalleur.App.Views;
 /// <summary>
 /// Étape 1 : lance les désinstalleurs l'un après l'autre et cherche les restes de chacun.
 /// Étape 2 : présente les restes ; rien n'est supprimé avant que l'utilisateur ait coché et confirmé.
+/// En mode « désinstallation forcée », le désinstalleur officiel n'est pas lancé : on cherche directement
+/// le dossier, les fichiers et les clés du logiciel (y compris son entrée « Uninstall »).
+/// Le même mode est proposé automatiquement quand le désinstalleur officiel est absent ou en échec.
 /// </summary>
 public partial class UninstallWindow : Window
 {
@@ -17,14 +21,27 @@ public partial class UninstallWindow : Window
     private readonly ObservableCollection<LeftoverItem> _leftovers = new();
     private readonly CancellationTokenSource _closing = new();
     private readonly SafetyGuard _guard = KnownLocations.CreateGuard();
+    private readonly bool _forcedMode;
+    /// <summary>Logiciels traités par désinstallation forcée (demandée ou proposée après un échec).</summary>
+    private readonly List<InstalledProgram> _forcedPrograms = new();
     private bool _stopRequested;
     private bool _busy;
 
-    public UninstallWindow(IReadOnlyList<InstalledProgram> programs)
+    /// <param name="forced">Vrai pour une désinstallation forcée : le désinstalleur officiel n'est pas lancé.
+    /// L'appelant a déjà expliqué l'opération et obtenu la confirmation de l'utilisateur.</param>
+    public UninstallWindow(IReadOnlyList<InstalledProgram> programs, bool forced = false)
     {
         InitializeComponent();
+        _forcedMode = forced;
         _queue = new ObservableCollection<QueueItem>(programs.Select(p => new QueueItem(p)));
         QueueList.ItemsSource = _queue;
+
+        if (forced)
+        {
+            Title = "Uninstallix · " + L.T("Désinstallation forcée");
+            HeaderText.Text = L.T("Désinstallation forcée");
+            SubHeaderText.Text = L.T("Le désinstalleur officiel n'est pas lancé : Uninstallix cherche lui-même les fichiers, dossiers et clés de registre du logiciel.");
+        }
 
         Loaded += async (_, _) => await RunQueueAsync();
         Closing += OnClosing;
@@ -61,8 +78,26 @@ public partial class UninstallWindow : Window
                     continue;
                 }
 
-                HeaderText.Text = L.F("Désinstallation {0} sur {1}", i + 1, _queue.Count);
                 FooterText.Text = L.F("En cours : {0}", item.Program.DisplayName);
+
+                if (_forcedMode)
+                {
+                    HeaderText.Text = _queue.Count > 1
+                        ? L.F("Désinstallation forcée {0} sur {1}", i + 1, _queue.Count)
+                        : L.T("Désinstallation forcée");
+                    if (item.Program.ForcedUninstallRefusal is { } refusal)
+                    {
+                        Journal.Write($"Désinstallation forcée refusée pour « {item.Program.DisplayName} » : élément protégé.");
+                        item.Status = QueueStatus.Failed;
+                        item.Detail = L.F("Désinstallation forcée refusée : {0}.", refusal);
+                        continue;
+                    }
+                    await ForceAsync(item);
+                    removedCount++;
+                    continue;
+                }
+
+                HeaderText.Text = L.F("Désinstallation {0} sur {1}", i + 1, _queue.Count);
                 item.Status = QueueStatus.Running;
                 item.Detail = L.T("Le désinstalleur officiel est ouvert : suivez ses instructions.");
 
@@ -87,27 +122,19 @@ public partial class UninstallWindow : Window
                         break;
 
                     case UninstallOutcome.MissingUninstaller:
-                        if (!AskForcedCleanup(item.Program))
+                    case UninstallOutcome.UninstallerError:
+                    case UninstallOutcome.Failed:
+                        if (!OfferForcedUninstall(item, result))
                         {
                             item.Status = QueueStatus.Failed;
-                            item.Detail = result.Message;
                             break;
                         }
+                        await ForceAsync(item);
                         removedCount++;
-                        item.Status = QueueStatus.Scanning;
-                        item.Detail = L.T("Recherche des fichiers et de l'entrée de registre du logiciel…");
-                        var forced = await ScanLeftoversAsync(item.Program);
-                        foreach (var leftover in forced)
-                            _leftovers.Add(leftover);
-                        item.Status = QueueStatus.ForcedCleanup;
-                        item.Detail = forced.Count == 0
-                            ? L.T("Désinstalleur introuvable et aucun fichier trouvé.")
-                            : L.F(forced.Count > 1
-                                ? "Désinstalleur introuvable : {0} éléments à nettoyer vous seront proposés."
-                                : "Désinstalleur introuvable : {0} élément à nettoyer vous sera proposé.", forced.Count);
                         break;
 
                     case UninstallOutcome.StillInstalled:
+                    case UninstallOutcome.RebootRequired:
                         item.Status = QueueStatus.StillInstalled;
                         item.Detail = result.Message;
                         break;
@@ -145,21 +172,64 @@ public partial class UninstallWindow : Window
     }
 
     /// <summary>
-    /// Le désinstalleur officiel a disparu : on propose de nettoyer à la main
+    /// Le désinstalleur officiel a disparu ou a échoué : on propose une désinstallation forcée
     /// (fichiers + entrée de registre), toujours avec validation avant suppression.
+    /// Jamais pour un logiciel protégé ou un favori protégé. Renvoie vrai si l'utilisateur accepte.
     /// </summary>
-    private bool AskForcedCleanup(InstalledProgram program)
+    private bool OfferForcedUninstall(QueueItem item, UninstallResult result)
     {
-        var answer = MessageBox.Show(this,
-            L.F("Le désinstalleur de « {0} » est introuvable : l'installation est probablement abîmée.\n\n" +
-                "Uninstallix peut faire une désinstallation forcée : il cherche les fichiers, dossiers et l'entrée de registre " +
-                "du logiciel, puis vous les présente. Rien ne sera supprimé sans votre accord.\n\n" +
-                "Fermez d'abord le logiciel s'il est ouvert. Continuer ?", program.DisplayName),
-            L.T("Désinstalleur introuvable"), MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.Yes);
-        return answer == MessageBoxResult.Yes;
+        var program = item.Program;
+        item.Detail = result.Message;
+        if (program.ForcedUninstallRefusal is { } refusal)
+        {
+            Journal.Write($"Désinstallation forcée non proposée pour « {program.DisplayName} » : élément protégé.");
+            item.Detail = result.Message + "  " + L.F("Désinstallation forcée refusée : {0}.", refusal);
+            return false;
+        }
+
+        var missing = result.Outcome == UninstallOutcome.MissingUninstaller;
+        var intro = missing
+            ? L.F("Le désinstalleur de « {0} » est introuvable : l'installation est probablement abîmée.", program.DisplayName)
+            : L.F("Le désinstalleur de « {0} » n'a pas fonctionné : {1}", program.DisplayName, result.Message);
+        var message = intro + "\n\n" +
+            L.T("Uninstallix peut faire une désinstallation forcée : il cherche les fichiers, dossiers et l'entrée de registre " +
+                "du logiciel, puis vous les présente. Rien ne sera supprimé sans votre accord.");
+        if (!missing)
+            message += "\n\n" + L.T("Si vous avez vous-même annulé la désinstallation, répondez Non.");
+        message += "\n\n" + L.T("Fermez d'abord le logiciel s'il est ouvert. Continuer ?");
+
+        var answer = MessageBox.Show(this, message,
+            missing ? L.T("Désinstalleur introuvable") : L.T("Échec du désinstalleur"),
+            MessageBoxButton.YesNo, MessageBoxImage.Warning, missing ? MessageBoxResult.Yes : MessageBoxResult.No);
+        var accepted = answer == MessageBoxResult.Yes;
+        Journal.Write(accepted
+            ? $"Désinstallation forcée acceptée pour « {program.DisplayName} »."
+            : $"Désinstallation forcée refusée par l'utilisateur pour « {program.DisplayName} ».");
+        return accepted;
     }
 
-    private static async Task<List<LeftoverItem>> ScanLeftoversAsync(InstalledProgram program)
+    /// <summary>Désinstallation forcée d'un logiciel : cherche tout ce qui lui appartient, sans rien supprimer.</summary>
+    private async Task ForceAsync(QueueItem item)
+    {
+        var program = item.Program;
+        Journal.Write($"Désinstallation forcée de « {program.DisplayName} » ({program.FullKeyPath}) : recherche des éléments.");
+        item.Status = QueueStatus.Scanning;
+        item.Detail = L.T("Recherche des fichiers et de l'entrée de registre du logiciel…");
+        var found = await ScanLeftoversAsync(program, forced: true);
+        foreach (var leftover in found)
+            _leftovers.Add(leftover);
+        _forcedPrograms.Add(program);
+        Journal.Write($"Désinstallation forcée de « {program.DisplayName} » : {found.Count} élément(s) proposé(s).");
+        item.Status = QueueStatus.ForcedCleanup;
+        item.Detail = found.Count switch
+        {
+            0 => L.T("Aucun fichier ni aucune clé de registre trouvés pour ce logiciel."),
+            1 => L.T("1 élément à supprimer vous sera proposé."),
+            _ => L.F("{0} éléments à supprimer vous seront proposés.", found.Count),
+        };
+    }
+
+    private static async Task<List<LeftoverItem>> ScanLeftoversAsync(InstalledProgram program, bool forced = false)
     {
         try
         {
@@ -172,7 +242,7 @@ public partial class UninstallWindow : Window
                     .ToList();
                 var scanner = new LeftoverScanner(KnownLocations.CreateGuard(), stillInstalled);
                 // Favoris protégés : jamais proposés, ni eux ni un dossier qui les contient.
-                return scanner.Scan(program)
+                return scanner.Scan(program, forced)
                     .Where(i => i.Kind == LeftoverKind.RegistryKey ||
                                 (!Favorites.IsProtectedPath(i.Path) && !Favorites.ContainsProtectedPath(i.Path)))
                     .ToList();
@@ -197,9 +267,10 @@ public partial class UninstallWindow : Window
         KeepButton.Visibility = Visibility.Visible;
         DeleteButton.Visibility = Visibility.Visible;
 
+        ForcedBanner.Visibility = _forcedPrograms.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         LeftoverGroupsList.ItemsSource = _leftovers
             .GroupBy(i => i.ProgramName)
-            .Select(g => new LeftoverGroup(g.Key, g.ToList()))
+            .Select(g => new LeftoverGroup(g.Key, g.ToList(), IsForced(g.Key)))
             .ToList();
 
         foreach (var item in _leftovers)
@@ -215,6 +286,43 @@ public partial class UninstallWindow : Window
     {
         if (e.PropertyName == nameof(LeftoverItem.IsSelected))
             UpdateLeftoverFooter();
+    }
+
+    private bool IsForced(string programName) => _forcedPrograms.Any(p => p.DisplayName == programName);
+
+    /// <summary>L'entrée « Uninstall » d'un logiciel forcé : sans elle, il reste dans la liste des programmes.</summary>
+    private LeftoverItem? ProgramEntry(InstalledProgram program) =>
+        _leftovers.FirstOrDefault(i => i.Kind == LeftoverKind.RegistryKey && i.Hive == program.Hive
+            && string.Equals(i.RegistrySubKey, program.KeyPath, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>Programmes ouverts dont l'exécutable est dans l'un des dossiers donnés (noms affichables).</summary>
+    private static List<string> RunningProcessesIn(IReadOnlyList<string> folders)
+    {
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (folders.Count == 0)
+            return names.ToList();
+        var roots = folders.Select(f => SafetyGuard.NormalizePath(f) + "\\").ToList();
+        foreach (var process in Process.GetProcesses())
+        {
+            try
+            {
+                var file = process.MainModule?.FileName;
+                if (file is null)
+                    continue;
+                var normalized = SafetyGuard.NormalizePath(file);
+                if (roots.Any(r => normalized.StartsWith(r, StringComparison.Ordinal)))
+                    names.Add(Path.GetFileName(file));
+            }
+            catch
+            {
+                // Processus système ou déjà terminé : inaccessible, ignoré.
+            }
+            finally
+            {
+                process.Dispose();
+            }
+        }
+        return names.OrderBy(n => n, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     private List<LeftoverItem> PendingSelection() =>
@@ -272,6 +380,29 @@ public partial class UninstallWindow : Window
             message += "\n" + L.F(lowConfidence > 1
                 ? "Attention : {0} éléments cochés sont marqués « À vérifier »."
                 : "Attention : {0} élément coché est marqué « À vérifier ».", lowConfidence) + "\n";
+
+        // Désinstallation forcée : entrée de registre non cochée, programme encore ouvert.
+        var forcedSelected = selected.Where(i => IsForced(i.ProgramName)).ToList();
+        if (forcedSelected.Count > 0)
+        {
+            foreach (var program in _forcedPrograms)
+            {
+                var entry = ProgramEntry(program);
+                if (entry is not null && !entry.IsSelected && entry.Succeeded != true && forcedSelected.Any(i => i.ProgramName == program.DisplayName))
+                    message += "\n" + L.F("« {0} » restera dans la liste des programmes : son entrée de registre n'est pas cochée.", program.DisplayName) + "\n";
+            }
+
+            var folders = forcedSelected.Where(i => i.Kind == LeftoverKind.Folder).Select(i => i.Path).ToList();
+            SetLeftoverButtonsEnabled(false);
+            FooterText.Text = L.T("Recherche des programmes encore ouverts…");
+            var running = await Task.Run(() => RunningProcessesIn(folders));
+            SetLeftoverButtonsEnabled(true);
+            UpdateLeftoverFooter();
+            if (running.Count > 0)
+                message += "\n" + L.F("Ces programmes sont encore ouverts : {0}. Fermez-les d'abord, sinon certains fichiers ne pourront pas être supprimés.",
+                    string.Join(", ", running.Take(6))) + "\n";
+        }
+
         message += "\n" + L.T("Seuls les éléments cochés sont concernés.");
 
         var answer = MessageBox.Show(this, message, L.T("Confirmer la suppression"),
@@ -291,10 +422,27 @@ public partial class UninstallWindow : Window
 
         var ok = selected.Count(i => i.Succeeded == true);
         var failed = selected.Count - ok;
-        CleanupHistory.Add("Restes de logiciels",
-            selected.Select(i => i.ProgramName).Distinct(),
-            selected.Where(i => i.Succeeded == true).Sum(i => i.SizeBytes ?? 0),
-            failed);
+        // Historique : une entrée « Désinstallation forcée » et une entrée « Restes de logiciels », selon les cas.
+        var normalSelected = selected.Except(forcedSelected).ToList();
+        if (normalSelected.Count > 0)
+            CleanupHistory.Add("Restes de logiciels",
+                normalSelected.Select(i => i.ProgramName).Distinct(),
+                normalSelected.Where(i => i.Succeeded == true).Sum(i => i.SizeBytes ?? 0),
+                normalSelected.Count(i => i.Succeeded != true));
+        if (forcedSelected.Count > 0)
+        {
+            CleanupHistory.Add("Désinstallation forcée",
+                forcedSelected.Select(i => i.ProgramName).Distinct(),
+                forcedSelected.Where(i => i.Succeeded == true).Sum(i => i.SizeBytes ?? 0),
+                forcedSelected.Count(i => i.Succeeded != true));
+            foreach (var program in _forcedPrograms.Where(p => forcedSelected.Any(i => i.ProgramName == p.DisplayName)))
+            {
+                var gone = !ProgramInventory.StillExists(program);
+                Journal.Write(gone
+                    ? $"Désinstallation forcée de « {program.DisplayName} » terminée : le logiciel n'est plus dans la liste."
+                    : $"Désinstallation forcée de « {program.DisplayName} » terminée : son entrée de registre est conservée.");
+            }
+        }
         HeaderText.Text = failed == 0 ? L.T("Nettoyage terminé") : L.T("Nettoyage terminé avec des erreurs");
         FooterText.Text = failed == 0
             ? L.F(ok > 1 ? "{0} éléments supprimés." : "{0} élément supprimé.", ok)

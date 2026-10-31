@@ -37,6 +37,61 @@ public static class ProgramInventory
         return key is not null;
     }
 
+    /// <summary>
+    /// Autres entrées « Uninstall » du même logiciel (même nom, version et éditeur), par exemple une copie
+    /// dans la vue 32 bits. La liste n'en affiche qu'une : après une désinstallation forcée, il faut aussi
+    /// proposer les autres pour que le logiciel disparaisse vraiment.
+    /// </summary>
+    public static List<(RegistryHive Hive, string KeyPath)> FindSameEntries(InstalledProgram program)
+    {
+        var result = new List<(RegistryHive, string)>();
+        foreach (var (hive, path) in new[]
+                 {
+                     (RegistryHive.LocalMachine, UninstallKey),
+                     (RegistryHive.LocalMachine, UninstallKey32),
+                     (RegistryHive.CurrentUser, UninstallKey),
+                 })
+        {
+            try
+            {
+                using var root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+                using var uninstall = root.OpenSubKey(path);
+                if (uninstall is null)
+                    continue;
+                foreach (var name in uninstall.GetSubKeyNames())
+                {
+                    var keyPath = path + "\\" + name;
+                    if (hive == program.Hive && keyPath.Equals(program.KeyPath, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    try
+                    {
+                        using var key = uninstall.OpenSubKey(name);
+                        if (key is null)
+                            continue;
+                        var displayName = (key.GetValue("DisplayName") as string)?.Trim();
+                        var version = (key.GetValue("DisplayVersion") as string)?.Trim();
+                        var publisher = (key.GetValue("Publisher") as string)?.Trim();
+                        if (string.Equals(displayName, program.DisplayName, StringComparison.OrdinalIgnoreCase)
+                            && version == program.Version
+                            && (string.IsNullOrWhiteSpace(publisher) ? null : publisher) == program.Publisher)
+                        {
+                            result.Add((hive, keyPath));
+                        }
+                    }
+                    catch
+                    {
+                        // Clé illisible : ignorée.
+                    }
+                }
+            }
+            catch
+            {
+                // Partie du registre inaccessible : on continue avec le reste.
+            }
+        }
+        return result;
+    }
+
     private static void ReadFrom(RegistryHive hive, string path, List<InstalledProgram> output)
     {
         using var root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);

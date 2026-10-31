@@ -46,7 +46,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Border Width="42" Height="42" CornerRadius="11" Background="{StaticResource AccentSoft}" Margin="0,0,16,0">
-                        <TextBlock Text="&#xE950;" Style="{StaticResource IconText}" FontSize="18" Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                        <TextBlock Text="&#xE950;" Style="{StaticResource IconText}" FontSize="18" Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <Grid>
@@ -54,7 +54,7 @@
                             <TextBlock x:Name="RamText" Text="—" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondary}" FontSize="13" />
                         </Grid>
                         <Grid Height="8" Margin="0,10,0,6">
-                            <Border CornerRadius="4" Background="#1A2547" />
+                            <Border CornerRadius="4" Background="{StaticResource TrackBackground}" />
                             <Border x:Name="RamBar" CornerRadius="4" Background="{StaticResource AccentGradient}" HorizontalAlignment="Left" Width="0" />
                         </Grid>
                         <TextBlock x:Name="RamResultText" Text="Effet temporaire : Windows réutilise ensuite la mémoire libre selon ses besoins."
@@ -77,7 +77,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Border Width="42" Height="42" CornerRadius="11" Background="{StaticResource AccentSoft}" Margin="0,0,16,0" VerticalAlignment="Top">
-                        <TextBlock Text="&#xE774;" Style="{StaticResource IconText}" FontSize="18" Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                        <TextBlock Text="&#xE774;" Style="{StaticResource IconText}" FontSize="18" Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                     </Border>
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="Cache DNS" FontWeight="SemiBold" FontSize="15" />
@@ -118,7 +118,7 @@
                             CornerRadius="11" Padding="4">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Profil" Style="{StaticResource SecondaryText}" VerticalAlignment="Center" Margin="10,0,10,0" />
-                            <Rectangle Width="1" Height="20" Fill="#33416B" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <Rectangle Width="1" Height="20" Fill="{StaticResource ControlBorder}" VerticalAlignment="Center" Margin="0,0,6,0" />
                             <RadioButton x:Name="ProfileCustom" GroupName="Profile" Style="{StaticResource SegmentButton}" Content="Personnalisé"
                                          Tag="Personnalisé" Checked="Profile_Checked" />
                             <RadioButton x:Name="ProfileGaming" GroupName="Profile" Style="{StaticResource SegmentButton}" Tag="Gaming"
@@ -164,7 +164,7 @@
                                         <Border Grid.Column="1" Width="38" Height="38" CornerRadius="10" Margin="0,0,14,0"
                                                 Background="{StaticResource CardBackgroundRaised}">
                                             <TextBlock Text="{Binding Glyph}" Style="{StaticResource IconText}" FontSize="16"
-                                                       Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                                                       Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                                         </Border>
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
@@ -172,7 +172,7 @@
                                                 <Border x:Name="ImpactBadge" Style="{StaticResource Badge}" Padding="7,1" Margin="10,0,0,0"
                                                         Background="{StaticResource AccentSoft}" ToolTip="{Binding ImpactToolTip}">
                                                     <TextBlock x:Name="ImpactLabel" Text="{Binding ImpactText}" FontSize="11" FontWeight="SemiBold"
-                                                               Foreground="#5AB4FF" />
+                                                               Foreground="{StaticResource LinkBrush}" />
                                                 </Border>
                                                 <TextBlock x:Name="Status" Text="{Binding StatusText}" FontSize="12" Margin="10,1,0,0"
                                                            Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Center" />
@@ -206,7 +206,7 @@
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" FontSize="13" Foreground="#5AB4FF"
+                                                <TextBlock Text="&#xE946;" Style="{StaticResource IconText}" FontSize="13" Foreground="{StaticResource LinkBrush}"
                                                            VerticalAlignment="Top" Margin="0,2,10,0" />
                                                 <StackPanel Grid.Column="1">
                                                     <TextBlock Text="À quoi il sert" FontSize="12" FontWeight="SemiBold" />
@@ -214,7 +214,7 @@
                                                                TextWrapping="Wrap" Margin="0,2,0,0" />
                                                 </StackPanel>
                                                 <TextBlock x:Name="ConsequenceIcon" Grid.Row="1" Text="&#xE72C;" Style="{StaticResource IconText}"
-                                                           FontSize="13" Foreground="#5AB4FF" VerticalAlignment="Top" Margin="0,12,10,0" />
+                                                           FontSize="13" Foreground="{StaticResource LinkBrush}" VerticalAlignment="Top" Margin="0,12,10,0" />
                                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0">
                                                     <TextBlock Text="Après le nettoyage" FontSize="12" FontWeight="SemiBold" />
                                                     <TextBlock Text="{Binding DisplayConsequence}" Style="{StaticResource SecondaryText}" FontSize="12"
@@ -256,7 +256,7 @@
                                         <Setter TargetName="ConsequenceIcon" Property="Foreground" Value="{StaticResource DangerBrush}" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                        <Setter TargetName="InfoButton" Property="Foreground" Value="#5AB4FF" />
+                                        <Setter TargetName="InfoButton" Property="Foreground" Value="{StaticResource LinkBrush}" />
                                     </DataTrigger>
                                 </DataTemplate.Triggers>
                             </DataTemplate>
@@ -275,7 +275,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Width="34" Height="34" CornerRadius="10" Background="{StaticResource AccentSoft}" Margin="0,0,12,0">
-                    <TextBlock Text="&#xEA99;" Style="{StaticResource IconText}" FontSize="15" Foreground="#5AB4FF" HorizontalAlignment="Center" />
+                    <TextBlock Text="&#xEA99;" Style="{StaticResource IconText}" FontSize="15" Foreground="{StaticResource LinkBrush}" HorizontalAlignment="Center" />
                 </Border>
                 <TextBlock x:Name="SelectionText" Grid.Column="1" VerticalAlignment="Center" FontSize="14" Text="—" />
                 <Button x:Name="CleanButton" Grid.Column="2" Style="{StaticResource AccentButton}" Click="Clean_Click" IsEnabled="False">

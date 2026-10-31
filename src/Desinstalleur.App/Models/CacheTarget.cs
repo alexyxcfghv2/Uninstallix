@@ -19,6 +19,18 @@ public enum CacheImpact
     Permanent,
 }
 
+/// <summary>Nettoyage particulier, fait autrement qu'en vidant des dossiers.</summary>
+public enum CacheSpecial
+{
+    None,
+
+    /// <summary>Cache de l'Optimisation de livraison, vidé par Delete-DeliveryOptimizationCache.</summary>
+    DeliveryOptimization,
+
+    /// <summary>Dossier Windows.old, supprimé par l'outil de nettoyage de Windows (cleanmgr).</summary>
+    WindowsOld,
+}
+
 /// <summary>Un cache que l'on peut vider (FiveM, Discord, navigateur, Corbeille…).</summary>
 public sealed class CacheTarget : ObservableObject
 {
@@ -93,6 +105,19 @@ public sealed class CacheTarget : ObservableObject
 
     /// <summary>Processus à fermer avant le nettoyage (sans « .exe »).</summary>
     public IReadOnlyList<string> Processes { get; init; } = Array.Empty<string>();
+
+    /// <summary>Si renseigné, seuls les fichiers de ce motif, directement dans les dossiers, sont supprimés (ex. « thumbcache_*.db »).</summary>
+    public string? FilePattern { get; init; }
+
+    /// <summary>Services Windows arrêtés pendant le nettoyage puis redémarrés (ex. wuauserv, bits).</summary>
+    public IReadOnlyList<string> StopServices { get; init; } = Array.Empty<string>();
+
+    public CacheSpecial Special { get; init; }
+
+    /// <summary>Avertissement important montré dans l'aperçu avant nettoyage (texte français, traduit à l'affichage).</summary>
+    public string? Warning { get; init; }
+
+    public string? DisplayWarning => Warning is null ? null : L.T(Warning);
 
     /// <summary>Nom affiché quand le logiciel doit être fermé.</summary>
     public string? AppName { get; init; }

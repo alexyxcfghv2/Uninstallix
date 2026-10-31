@@ -11,6 +11,8 @@ public partial class App : Application
         DispatcherUnhandledException += OnUnhandledException;
         base.OnStartup(e);
         L.Init(AppSettings.Current.Language);
+        // Avant toute fenêtre : les vues lisent les pinceaux en StaticResource.
+        ThemeManager.Apply(AppSettings.Current);
 
         if (SelfInstaller.IsUninstallMode(e.Args))
         {
