@@ -65,12 +65,27 @@ public static partial class L
 
     // ---- Traduction automatique des textes du XAML ----
 
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<DependencyObject, object> Seen = new();
+
     private static void HookUi()
     {
+        // WPF n'envoie l'événement Loaded qu'aux éléments qui ont eux-mêmes un gestionnaire Loaded : un
+        // gestionnaire de classe ne suffit pas, presque rien n'était traduit. SizeChanged, lui, est levé pour
+        // chaque élément lors de sa première mise en page (et quand il devient visible), modèles compris.
+        EventManager.RegisterClassHandler(typeof(FrameworkElement), FrameworkElement.SizeChangedEvent,
+            new SizeChangedEventHandler((s, _) => TranslateOnce(s)), true);
         EventManager.RegisterClassHandler(typeof(FrameworkElement), FrameworkElement.LoadedEvent,
-            new RoutedEventHandler((s, _) => { if (s is DependencyObject d) Translate(d); }), true);
+            new RoutedEventHandler((s, _) => TranslateOnce(s)), true);
         EventManager.RegisterClassHandler(typeof(ContextMenu), ContextMenu.OpenedEvent,
             new RoutedEventHandler((s, _) => { if (s is ContextMenu m) TranslateMenu(m); }), true);
+    }
+
+    private static void TranslateOnce(object sender)
+    {
+        if (sender is not DependencyObject d || Seen.TryGetValue(d, out _))
+            return;
+        Seen.Add(d, Seen);
+        Translate(d);
     }
 
     /// <summary>Traduit un élément de l'interface (appelé à chaque chargement, sans effet s'il est déjà traduit).</summary>
